@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Forge — Build Together</title>
+  <meta name="description" content="Forge is a cross-disciplinary collaboration platform where developers, designers, and technical writers pitch ideas, share resources, and book expert mentors." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<!-- ============ AUTH GATE ============ -->
+<div id="authScreen" class="auth-screen">
+  <div class="auth-layout">
+    <div class="auth-hero">
+      <div class="logo">
+        <div class="logo-icon">F</div>
+        <h1 class="logo-text">Forge</h1>
+      </div>
+      <p class="auth-hero-tagline">Where developers, designers, and writers build extraordinary products together.</p>
+      <ul class="auth-feature-list">
+        <li><span class="feature-dot"></span> Pitch ideas, run polls & recruit co-creators</li>
+        <li><span class="feature-dot"></span> Discover & bookmark curated design & code kits</li>
+        <li><span class="feature-dot"></span> Book 1:1 sessions & notes with verified mentors</li>
+      </ul>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button id="loginTabBtn" class="auth-tab-btn active">Log In</button>
+        <button id="signupTabBtn" class="auth-tab-btn">Sign Up</button>
+      </div>
+
+      <form id="loginForm" class="form-group">
+        <input required type="email" id="loginEmail" placeholder="Email address" class="form-input" autocomplete="email" />
+        <input required type="password" id="loginPassword" placeholder="Password" class="form-input" autocomplete="current-password" />
+        <button type="submit" class="btn btn-primary w-full">Log In</button>
+      </form>
+
+      <form id="signupForm" class="form-group hidden">
+        <input required type="text" id="signupName" placeholder="Full name" class="form-input" />
+        <input required type="email" id="signupEmail" placeholder="Email address" class="form-input" />
+        <input required type="password" id="signupPassword" placeholder="Password (min 8 chars)" class="form-input" />
+        <select id="signupRole" class="form-select">
+          <option value="CREATOR">Creator (Developer / Designer / Writer)</option>
+          <option value="EXPERT">Expert / Mentor</option>
+        </select>
+        <button type="submit" class="btn btn-primary w-full">Create Account</button>
+      </form>
+
+      <p id="authError" class="auth-error hidden"></p>
+
+      <div class="demo-login-box">
+        <p class="demo-login-title">Quick Demo Login</p>
+        <p class="demo-login-hint">Password: <code>Password123!</code></p>
+        <div class="demo-login-grid">
+          <button type="button" class="demo-login-btn" data-email="creator@forge.dev">
+            <span class="demo-role">Alex Creator</span>
+            <span class="demo-email">creator@forge.dev</span>
+          </button>
+          <button type="button" class="demo-login-btn" data-email="expert@forge.dev">
+            <span class="demo-role">Sarah Expert</span>
+            <span class="demo-email">expert@forge.dev</span>
+          </button>
+          <button type="button" class="demo-login-btn" data-email="demo@forge.dev">
+            <span class="demo-role">Demo User</span>
+            <span class="demo-email">demo@forge.dev</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MAIN APP ============ -->
+<div id="appScreen" class="app-screen hidden">
+  
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon">F</div>
+        <span class="logo-text">Forge</span>
+      </div>
+    </div>
+
+    <nav id="tabNav" class="sidebar-nav">
+      <button data-tab="dashboard" class="sidebar-link active">
+        <span class="material-symbols-outlined nav-icon">home</span>
+        <span class="nav-label">Home</span>
+      </button>
+      <button data-tab="ideatank" class="sidebar-link">
+        <span class="material-symbols-outlined nav-icon">lightbulb</span>
+        <span class="nav-label">Idea Tank</span>
+      </button>
+      <button data-tab="resources" class="sidebar-link">
+        <span class="material-symbols-outlined nav-icon">inventory_2</span>
+        <span class="nav-label">Resources</span>
+      </button>
+      <button data-tab="bookings" class="sidebar-link">
+        <span class="material-symbols-outlined nav-icon">psychology</span>
+        <span class="nav-label">Mentors</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="shortcut-badge">Press <kbd>Ctrl</kbd> + <kbd>K</kbd> to search</div>
+    </div>
+  </aside>
+
+  <!-- App Shell Right Side -->
+  <div class="app-content-wrap">
+    
+    <header class="app-topbar">
+      <div class="topbar-search">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input id="globalSearch" type="search" placeholder="Search ideas, resources, mentors..." class="form-input search-input-top" />
+      </div>
+
+      <div class="topbar-actions">
+        <!-- Notification Bell -->
+        <div class="notif-dropdown-wrapper">
+          <button id="notifBtn" class="topbar-icon-btn" title="Notifications">
+            <span class="material-symbols-outlined">notifications</span>
+            <span id="notifBadge" class="notif-badge hidden">0</span>
+          </button>
+
+          <div id="notifMenu" class="notif-menu hidden">
+            <div class="notif-header">
+              <h4>Notifications</h4>
+              <button id="markAllReadBtn" class="btn-text-sm">Mark all read</button>
+            </div>
+            <div id="notifList" class="notif-list">
+              <p class="empty-notif">No new notifications</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="user-profile-menu">
+          <button id="profileBtn" class="profile-trigger" title="Edit profile">
+            <div id="navAvatar" class="avatar"></div>
+            <div class="header-user-info">
+              <p id="navUserName" class="header-user-name"></p>
+              <p id="navUserRole" class="header-user-role"></p>
+            </div>
+          </button>
+          <button id="logoutBtn" class="btn-danger-ghost">Log out</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Mobile Nav Bar -->
+    <div class="mobile-tabs">
+      <button data-tab="dashboard" class="mobile-tab-btn active">Home</button>
+      <button data-tab="ideatank" class="mobile-tab-btn">Ideas</button>
+      <button data-tab="resources" class="mobile-tab-btn">Resources</button>
+      <button data-tab="bookings" class="mobile-tab-btn">Mentors</button>
+    </div>
+
+    <main class="main-content">
+
+      <!-- ===== TAB: DASHBOARD ===== -->
+      <section id="tab-dashboard" class="tab-panel">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Welcome back, <span id="dashUserName" class="text-accent"></span></h2>
+            <p class="section-subtitle">Here is what's happening across your collaboration workspace today.</p>
+          </div>
+        </div>
+
+        <div id="statsGrid" class="stats-grid"></div>
+
+        <div class="dashboard-grid">
+          <div class="dashboard-panel">
+            <h3 class="panel-title">Quick Actions</h3>
+            <div class="quick-actions">
+              <button class="quick-action-btn" data-goto="ideatank" data-action="new-idea">
+                <span class="material-symbols-outlined">lightbulb</span> Pitch an idea
+              </button>
+              <button class="quick-action-btn" data-goto="resources" data-action="new-resource">
+                <span class="material-symbols-outlined">inventory_2</span> Share a resource
+              </button>
+              <button class="quick-action-btn" data-goto="bookings">
+                <span class="material-symbols-outlined">psychology</span> Find a mentor
+              </button>
+              <button class="quick-action-btn" id="openProfileFromDash">
+                <span class="material-symbols-outlined">person</span> Edit profile
+              </button>
+            </div>
+
+            <div style="margin-top: var(--space-xl);">
+              <h3 class="panel-title">Activity Feed</h3>
+              <div id="activityFeed" class="activity-feed"></div>
+            </div>
+          </div>
+
+          <div class="dashboard-panel">
+            <h3 class="panel-title">Trending Ideas</h3>
+            <div id="recentIdeasList" class="recent-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== TAB: IDEA TANK ===== -->
+      <section id="tab-ideatank" class="tab-panel hidden">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Idea Tank</h2>
+            <p class="section-subtitle">Pitch projects, validate concepts, gather feedback, and signal community interest.</p>
+          </div>
+          <button id="newIdeaBtn" class="btn btn-primary">+ Pitch Idea</button>
+        </div>
+
+        <div class="toolbar flex-col gap-md">
+          <div class="flex gap-md justify-between items-center flex-wrap">
+            <div class="search-box flex-1">
+              <span class="material-symbols-outlined search-icon">search</span>
+              <input id="ideaSearch" type="search" placeholder="Search ideas by title, description, or tag..." class="form-input search-input" />
+            </div>
+
+            <div class="filter-controls flex gap-sm items-center">
+              <div class="pill-group">
+                <button id="scopeAllIdeasBtn" class="pill-btn active" data-scope="all">All Ideas</button>
+                <button id="scopeMyIdeasBtn" class="pill-btn" data-scope="mine">My Ideas</button>
+              </div>
+
+              <select id="ideaSortSelect" class="form-select sort-select">
+                <option value="newest">Latest Pitch</option>
+                <option value="upvotes">Most Upvoted</option>
+                <option value="comments">Most Discussed</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <form id="ideaForm" class="form-card hidden" style="margin-bottom:var(--space-lg);">
+          <div class="form-group">
+            <input required id="ideaTitle" placeholder="Project title" class="form-input" />
+            <textarea required id="ideaDescription" placeholder="Describe the idea, what you need, and who should collaborate..." rows="3" class="form-input"></textarea>
+            <input id="ideaTags" placeholder="Tags, comma separated (e.g. react, figma, docs)" class="form-input" />
+            <div class="flex gap-sm">
+              <button type="submit" class="btn btn-primary">Publish Idea</button>
+              <button type="button" id="cancelIdeaBtn" class="btn btn-ghost">Cancel</button>
+            </div>
+          </div>
+        </form>
+
+        <div id="ideaFeed" class="idea-feed"></div>
+      </section>
+
+      <!-- ===== TAB: RESOURCES ===== -->
+      <section id="tab-resources" class="tab-panel hidden">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Resource Exchange</h2>
+            <p class="section-subtitle">UI kits, code snippets, templates, guides, and tools shared by creators & mentors.</p>
+          </div>
+          <button id="newResourceBtn" class="btn btn-primary">+ Share Resource</button>
+        </div>
+
+        <div class="toolbar flex-col gap-md">
+          <div class="flex gap-md justify-between items-center flex-wrap">
+            <div class="search-box flex-1">
+              <span class="material-symbols-outlined search-icon">search</span>
+              <input id="resourceSearch" type="search" placeholder="Search resources..." class="form-input search-input" />
+            </div>
+
+            <div class="pill-group">
+              <button id="resFilterAllBtn" class="pill-btn active" data-res-filter="all">All Resources</button>
+              <button id="resFilterSavedBtn" class="pill-btn" data-res-filter="saved">Saved (<span id="savedResCount">0</span>)</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="categoryFilters" class="filter-bar" style="margin-bottom:var(--space-lg);">
+          <button data-category="" class="filter-btn cat-btn active">All Categories</button>
+          <button data-category="UI_KIT" class="filter-btn cat-btn">UI Kit</button>
+          <button data-category="CODE_SNIPPET" class="filter-btn cat-btn">Code Snippet</button>
+          <button data-category="TEMPLATE" class="filter-btn cat-btn">Template</button>
+          <button data-category="GUIDE" class="filter-btn cat-btn">Guide</button>
+          <button data-category="TOOL" class="filter-btn cat-btn">Tool</button>
+        </div>
+
+        <form id="resourceForm" class="form-card hidden" style="margin-bottom:var(--space-lg);">
+          <div class="form-group">
+            <input required id="resourceTitle" placeholder="Resource title" class="form-input" />
+            <textarea required id="resourceDescription" placeholder="What is it, and how should people use it?" rows="2" class="form-input"></textarea>
+            <div class="form-row">
+              <select id="resourceCategory" class="form-select" style="flex:1;">
+                <option value="UI_KIT">UI Kit</option>
+                <option value="CODE_SNIPPET">Code Snippet</option>
+                <option value="TEMPLATE">Template</option>
+                <option value="GUIDE">Guide</option>
+                <option value="TOOL">Tool</option>
+              </select>
+              <input required id="resourceUrl" placeholder="Download or Resource URL" class="form-input" style="flex:2;" />
+            </div>
+            <div class="flex gap-sm">
+              <button type="submit" class="btn btn-primary">Share Resource</button>
+              <button type="button" id="cancelResourceBtn" class="btn btn-ghost">Cancel</button>
+            </div>
+          </div>
+        </form>
+
+        <div id="resourceGrid" class="resource-grid"></div>
+      </section>
+
+      <!-- ===== TAB: EXPERT BOOKING ===== -->
+      <section id="tab-bookings" class="tab-panel hidden">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Expert Mentors</h2>
+            <p class="section-subtitle">Connect 1:1 with experienced engineers, designers, and strategists.</p>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="search-box">
+            <span class="material-symbols-outlined search-icon">search</span>
+            <input id="expertSearch" type="search" placeholder="Search mentors by name, bio, or skill..." class="form-input search-input" />
+          </div>
+        </div>
+
+        <div id="expertGrid" class="expert-grid"></div>
+
+        <div style="margin-top:var(--space-2xl);">
+          <h3 class="booking-section-title">My Mentorship Sessions</h3>
+          <div id="bookingList" class="bookings-list"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Booking Modal -->
+<div id="bookingModal" class="modal-overlay hidden">
+  <div class="modal-card">
+    <h3 class="modal-title">Book Session with <span id="bookingExpertName" class="text-accent"></span></h3>
+    <p id="bookingExpertBio" class="modal-subtitle"></p>
+    <form id="bookingForm" class="form-group">
+      <input id="bookingTitle" placeholder="Session topic (e.g. Design Review, Code Audit)" class="form-input" />
+      <input required type="datetime-local" id="bookingDatetime" class="form-input" />
+      <div class="flex gap-sm" style="margin-top: 8px;">
+        <button type="submit" class="btn btn-primary flex-1">Request Booking</button>
+        <button type="button" id="closeBookingModal" class="btn btn-ghost">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Session Notes Modal -->
+<div id="sessionNotesModal" class="modal-overlay hidden">
+  <div class="modal-card modal-card-wide">
+    <h3 class="modal-title">Session Notes</h3>
+    <p id="sessionNotesSubtitle" class="modal-subtitle">Document key takeaways and action items from your session.</p>
+    <form id="sessionNotesForm" class="form-group">
+      <input type="hidden" id="sessionNotesBookingId" />
+      <textarea id="sessionNotesText" rows="6" placeholder="Write feedback, recommendations, or key takeaways here..." class="form-input"></textarea>
+      <div class="flex gap-sm" style="margin-top: 8px;">
+        <button type="submit" class="btn btn-primary flex-1">Save Notes</button>
+        <button type="button" id="closeSessionNotesModal" class="btn btn-ghost">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div id="profileModal" class="modal-overlay hidden">
+  <div class="modal-card modal-card-wide">
+    <h3 class="modal-title">Your Profile</h3>
+    <p class="modal-subtitle">Update your info to showcase your skills and portfolio across the Forge community.</p>
+    <form id="profileForm" class="form-group">
+      <label class="form-label">Bio</label>
+      <textarea id="profileBio" rows="3" placeholder="Tell the community about your background..." class="form-input"></textarea>
+      
+      <label class="form-label">Skills (comma separated)</label>
+      <input id="profileSkills" placeholder="e.g. React, UX Design, Technical Writing, AWS" class="form-input" />
+      
+      <label class="form-label">Portfolio / Website Link</label>
+      <input id="profilePortfolioUrl" placeholder="https://yourwebsite.dev" class="form-input" />
+
+      <div class="flex gap-sm" style="margin-top: 12px;">
+        <button type="submit" class="btn btn-primary flex-1">Save Profile</button>
+        <button type="button" id="closeProfileModal" class="btn btn-ghost">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
