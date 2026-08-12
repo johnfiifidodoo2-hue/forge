@@ -24,13 +24,30 @@ function sanitizeUser(user) {
   return safe;
 }
 
+// Accepts any valid email address (local-part, @, domain) including
+// plus-tags, unicode, and unusual TLDs. Returns null when invalid.
+function normalizeEmail(raw) {
+  if (typeof raw !== 'string') return null;
+  const email = raw.trim().toLowerCase();
+  // Loose but safe: "something@something.something"
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null;
+  return email;
+}
+
 // POST /api/auth/signup
 router.post('/signup', async (req, res) => {
   try {
-    const { email, password, name, role } = req.body;
+    const { password, name, role } = req.body;
+    const email = normalizeEmail(req.body.email);
 
-    if (!email || !password || !name) {
+    if (!email) {
+      return res.status(400).json({ error: 'Please enter a valid email address.' });
+    }
+    if (!password || !name) {
       return res.status(400).json({ error: 'email, password, and name are required.' });
+    }
+    if (typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters.' });
     }
 
     if (role && !['CREATOR', 'EXPERT'].includes(role)) {
@@ -64,10 +81,11 @@ router.post('/signup', async (req, res) => {
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const email = normalizeEmail(req.body.email);
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'email and password are required.' });
+      return res.status(400).json({ error: 'Please enter a valid email and password.' });
     }
 
     const user = await prisma.user.findUnique({ where: { email } });

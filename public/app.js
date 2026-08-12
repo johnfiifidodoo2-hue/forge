@@ -243,7 +243,7 @@ async function performLogin(email, password) {
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
-    const email = document.getElementById('loginEmail').value;
+    const email = document.getElementById('loginEmail').value.trim().toLowerCase();
     const password = document.getElementById('loginPassword').value;
     await performLogin(email, password);
   } catch (err) {
@@ -268,8 +268,8 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   document.getElementById('authError').classList.add('hidden');
   try {
-    const name = document.getElementById('signupName').value;
-    const email = document.getElementById('signupEmail').value;
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim().toLowerCase();
     const password = document.getElementById('signupPassword').value;
     const role = document.getElementById('signupRole').value;
     const data = await api('/auth/signup', {
