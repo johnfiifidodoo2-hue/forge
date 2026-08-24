@@ -90,12 +90,12 @@ router.post('/login', async (req, res) => {
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+      return res.status(404).json({ error: 'No account found with this email address. Please click "Sign Up" to register.' });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+      return res.status(401).json({ error: 'Incorrect password. Please try again.' });
     }
 
     const token = signToken(user);
