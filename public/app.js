@@ -251,19 +251,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   }
 });
 
-document.querySelectorAll('.demo-login-btn').forEach((btn) => {
-  btn.addEventListener('click', async () => {
-    const email = btn.dataset.email;
-    document.getElementById('loginEmail').value = email;
-    document.getElementById('loginPassword').value = DEMO_PASSWORD;
-    try {
-      await performLogin(email, DEMO_PASSWORD);
-    } catch (err) {
-      showAuthError(err.message);
-    }
-  });
-});
-
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   document.getElementById('authError').classList.add('hidden');
@@ -1134,11 +1121,10 @@ function renderBookingRow(b, index) {
           ${actions ? `<div class="booking-actions">${actions}</div>` : ''}
         </div>
       </div>
-      ${
-        b.notes
-          ? `<div class="booking-notes-display"><strong>Notes:</strong> ${escapeHtml(b.notes)}</div>`
-          : ''
-      }
+      ${b.notes
+      ? `<div class="booking-notes-display"><strong>Notes:</strong> ${escapeHtml(b.notes)}</div>`
+      : ''
+    }
     </div>
   </div>`;
 }
