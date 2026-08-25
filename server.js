@@ -44,10 +44,23 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/users', userRoutes);
 
-// Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', service: 'forge-api' });
+// Health check — also tests DB connectivity
+app.get('/api/health', async (req, res) => {
+  try {
+    const prisma = require('./db');
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'ok', service: 'forge-api', db: 'connected' });
+  } catch (err) {
+    console.error('[FORGE] Health check DB error:', err.message);
+    res.status(503).json({
+      status: 'error',
+      service: 'forge-api',
+      db: 'disconnected',
+      detail: err.message,
+    });
+  }
 });
+
 
 // 404 for unmatched API routes
 app.use('/api', (req, res) => {

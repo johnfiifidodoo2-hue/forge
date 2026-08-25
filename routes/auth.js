@@ -73,8 +73,14 @@ router.post('/signup', async (req, res) => {
     const token = signToken(user);
     res.status(201).json({ user: sanitizeUser(user), token });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Something went wrong during signup.' });
+    console.error('[FORGE] Signup error:', err.message, err.stack);
+    if (err.message && err.message.includes('DATABASE_URL')) {
+      return res.status(500).json({ error: 'Database not configured. Check Vercel environment variables.' });
+    }
+    if (err.code === 'P1001' || err.code === 'P1002' || err.code === 'P1003') {
+      return res.status(500).json({ error: 'Cannot reach the database. Check DATABASE_URL in Vercel settings.' });
+    }
+    res.status(500).json({ error: 'Something went wrong during signup. Please try again.' });
   }
 });
 
@@ -101,8 +107,14 @@ router.post('/login', async (req, res) => {
     const token = signToken(user);
     res.json({ user: sanitizeUser(user), token });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Something went wrong during login.' });
+    console.error('[FORGE] Login error:', err.message, err.stack);
+    if (err.message && err.message.includes('DATABASE_URL')) {
+      return res.status(500).json({ error: 'Database not configured. Check Vercel environment variables.' });
+    }
+    if (err.code === 'P1001' || err.code === 'P1002' || err.code === 'P1003') {
+      return res.status(500).json({ error: 'Cannot reach the database. Check DATABASE_URL in Vercel settings.' });
+    }
+    res.status(500).json({ error: 'Something went wrong during login. Please try again.' });
   }
 });
 
