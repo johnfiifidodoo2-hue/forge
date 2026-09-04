@@ -922,6 +922,69 @@ document.getElementById('chatForm')?.addEventListener('submit', async (e) => {
   }
 });
 
+// Invite Member Modal Handlers
+document.getElementById('openInviteModalBtn')?.addEventListener('click', async () => {
+  const channel = state.activeChannel || 'general-collaboration';
+  const meta = CHANNEL_META[channel] || { title: `# ${channel}` };
+  document.getElementById('inviteChannelName').textContent = meta.title;
+
+  const list = document.getElementById('inviteMembersList');
+  list.innerHTML = `<p style="font-size:12px; color:var(--text-tertiary);">Loading community members...</p>`;
+  document.getElementById('inviteModal').classList.remove('hidden');
+
+  try {
+    const { experts } = await api('/bookings/experts');
+    const creators = [
+      { id: 101, name: 'Kai Chen', role: 'CREATOR', bio: 'Full-stack developer & UI enthusiast' },
+      { id: 102, name: 'Marcus Thorne', role: 'CREATOR', bio: 'Hardware systems engineer & Verilog developer' },
+      { id: 103, name: 'Elena Vance', role: 'CREATOR', bio: 'Cryptography & Rust developer' },
+    ];
+    const allMembers = [...experts, ...creators];
+
+    list.innerHTML = allMembers
+      .map((m) => `
+      <div class="glass-card flex items-center justify-between" style="padding:10px 14px; margin-bottom:6px;">
+        <div class="flex items-center gap-sm">
+          <div class="avatar avatar-xs" style="background:${nameGradient(m.name)}">${initials(m.name)}</div>
+          <div>
+            <strong style="font-size:13px; display:block;">${escapeHtml(m.name)}</strong>
+            <span class="badge-role ${m.role.toLowerCase()}">${m.role === 'EXPERT' ? 'Mentor' : 'Creator'}</span>
+          </div>
+        </div>
+        <button class="btn btn-primary invite-action-btn" data-user-name="${escapeHtml(m.name)}" style="padding:4px 10px; font-size:11px;">
+          + Invite
+        </button>
+      </div>`)
+      .join('');
+
+    list.querySelectorAll('.invite-action-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const userName = btn.dataset.userName;
+        try {
+          await api('/chat/messages', {
+            method: 'POST',
+            body: JSON.stringify({
+              content: `👋 Invited ${userName} to join #${channel}! Excited to collaborate here.`,
+              roomId: channel,
+            }),
+          });
+          document.getElementById('inviteModal').classList.add('hidden');
+          showToast(`Invited ${userName} to #${channel}!`);
+          loadChatMessages();
+        } catch (err) {
+          showToast(err.message, true);
+        }
+      });
+    });
+  } catch (err) {
+    list.innerHTML = `<p class="error-text">${err.message}</p>`;
+  }
+});
+
+document.getElementById('closeInviteModal')?.addEventListener('click', () => {
+  document.getElementById('inviteModal').classList.add('hidden');
+});
+
 // ============================================================
 // AI INVESTOR PROPOSAL ENGINE
 // ============================================================
@@ -1070,19 +1133,23 @@ document.querySelectorAll('.cat-btn').forEach((btn) => {
 });
 
 const CATEGORY_LABELS = {
-  UI_KIT: 'UI Kit',
+  GITHUB_REPO: 'GitHub Repository',
+  HARDWARE: 'Computer Architecture & Hardware',
+  TEMPLATE: 'Startup & Funding Template',
+  UI_KIT: 'UI Kit & Design Tokens',
+  GUIDE: 'Documentation & Guide',
+  TOOL: 'Platform & Cloud Tool',
   CODE_SNIPPET: 'Code Snippet',
-  TEMPLATE: 'Template',
-  GUIDE: 'Guide',
-  TOOL: 'Tool',
 };
 
 const CATEGORY_CSS = {
-  UI_KIT: 'ui-kit',
-  CODE_SNIPPET: 'code-snippet',
+  GITHUB_REPO: 'code-snippet',
+  HARDWARE: 'guide',
   TEMPLATE: 'template',
+  UI_KIT: 'ui-kit',
   GUIDE: 'guide',
   TOOL: 'tool',
+  CODE_SNIPPET: 'code-snippet',
 };
 
 async function loadResources() {
@@ -1128,7 +1195,7 @@ async function loadResources() {
         const label = CATEGORY_LABELS[catKey] || catKey;
         html += `<div class="category-group-header">
           <span class="material-symbols-outlined text-accent" style="font-size:20px;">folder</span>
-          ${escapeHtml(label)} Resources (${grouped[catKey].length})
+          ${escapeHtml(label)} (${grouped[catKey].length})
         </div>`;
         html += grouped[catKey].map((r) => renderResourceCard(r, index++)).join('');
       });
@@ -1164,15 +1231,9 @@ function toggleBookmarkResource(resId) {
 function renderResourceCard(r, index) {
   const cssClass = CATEGORY_CSS[r.category] || '';
   const isSaved = state.savedResources.includes(r.id);
-  const codeUrl = r.githubUrl || r.downloadUrl;
-
-  const codeBtn = codeUrl
-    ? `<a href="${encodeURI(codeUrl)}" target="_blank" rel="noopener noreferrer" class="btn-github-code" style="margin-right:auto;">
-        <svg height="13" width="13" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:middle;">
-          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
-        </svg> View GitHub Code ↗
-       </a>`
-    : '';
+  const targetUrl = r.url || r.downloadUrl;
+  const isGithub = r.category === 'GITHUB_REPO' || String(targetUrl).includes('github.com');
+  const btnLabel = isGithub ? 'Open GitHub Repo ↗' : 'Open Resource ↗';
 
   return `
   <div class="glass-card resource-card card-animated" style="${staggerDelay(index)}">
@@ -1182,9 +1243,9 @@ function renderResourceCard(r, index) {
     <span class="category-badge ${cssClass}">${CATEGORY_LABELS[r.category] || r.category}</span>
     <h3 class="resource-title">${escapeHtml(r.title)}</h3>
     <p class="resource-description">${escapeHtml(r.description)}</p>
-    <div class="resource-footer" style="flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center;">
-      ${codeBtn}
-      <a href="${encodeURI(r.downloadUrl)}" target="_blank" rel="noopener noreferrer" class="btn-download">Open Docs ↗</a>
+    <div class="resource-footer" style="margin-top:var(--space-md); flex-wrap:wrap; justify-content:space-between; align-items:center;">
+      <span class="text-xs text-tertiary">Verified Link</span>
+      <a href="${encodeURI(targetUrl)}" target="_blank" rel="noopener noreferrer" class="btn-download">${btnLabel}</a>
     </div>
   </div>`;
 }

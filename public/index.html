@@ -342,7 +342,12 @@
                 </div>
               </div>
 
-              <h4 style="font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-tertiary); margin-top:var(--space-md); margin-bottom: var(--space-xs);">Active Mentors & Creators</h4>
+              <div class="flex justify-between items-center" style="margin-top:var(--space-md); margin-bottom: var(--space-xs);">
+                <h4 style="font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-tertiary);">Active Mentors & Creators</h4>
+                <button id="openInviteModalBtn" class="btn btn-ghost" style="padding: 2px 8px; font-size:11px; border:1px solid var(--border);">
+                  <span class="material-symbols-outlined icon-inline" style="font-size:13px;">person_add</span> + Invite
+                </button>
+              </div>
               <div id="chatUserList" class="chat-active-users">
                 <p style="font-size:12px; color:var(--text-tertiary);">Loading active members...</p>
               </div>
@@ -462,13 +467,14 @@
             </div>
           </div>
 
-          <div id="categoryFilters" class="filter-bar" style="margin-bottom:var(--space-lg);">
+          <div id="categoryFilters" class="filter-bar" style="margin-bottom:var(--space-lg); flex-wrap:wrap;">
             <button data-category="" class="filter-btn cat-btn active">All Categories</button>
-            <button data-category="UI_KIT" class="filter-btn cat-btn">UI Kit</button>
-            <button data-category="CODE_SNIPPET" class="filter-btn cat-btn">Code Snippet</button>
-            <button data-category="TEMPLATE" class="filter-btn cat-btn">Template</button>
-            <button data-category="GUIDE" class="filter-btn cat-btn">Guide</button>
-            <button data-category="TOOL" class="filter-btn cat-btn">Tool</button>
+            <button data-category="GITHUB_REPO" class="filter-btn cat-btn">GitHub Repos</button>
+            <button data-category="HARDWARE" class="filter-btn cat-btn">Comp Arch & Hardware</button>
+            <button data-category="TEMPLATE" class="filter-btn cat-btn">Startup & Funding</button>
+            <button data-category="UI_KIT" class="filter-btn cat-btn">UI Kits & Design</button>
+            <button data-category="GUIDE" class="filter-btn cat-btn">Docs & Guides</button>
+            <button data-category="TOOL" class="filter-btn cat-btn">Platforms & Tools</button>
           </div>
 
           <form id="resourceForm" class="form-card hidden" style="margin-bottom:var(--space-lg);">
@@ -478,11 +484,12 @@
                 rows="2" class="form-input"></textarea>
               <div class="form-row">
                 <select id="resourceCategory" class="form-select" style="flex:1;">
-                  <option value="UI_KIT">UI Kit</option>
-                  <option value="CODE_SNIPPET">Code Snippet</option>
-                  <option value="TEMPLATE">Template</option>
-                  <option value="GUIDE">Guide</option>
-                  <option value="TOOL">Tool</option>
+                  <option value="GITHUB_REPO">GitHub Repository</option>
+                  <option value="HARDWARE">Computer Architecture & Hardware</option>
+                  <option value="TEMPLATE">Startup & Funding Template</option>
+                  <option value="UI_KIT">UI Kit & Design Tokens</option>
+                  <option value="GUIDE">Documentation & Guide</option>
+                  <option value="TOOL">Platform & Cloud Tool</option>
                 </select>
                 <input required id="resourceUrl" placeholder="Download or Resource URL" class="form-input"
                   style="flex:2;" />
@@ -591,6 +598,18 @@
           <button type="button" id="closeProfileModal" class="btn btn-ghost">Cancel</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Invite Member Modal -->
+  <div id="inviteModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h3 class="modal-title">Invite Member to Channel</h3>
+      <p class="modal-subtitle">Select a creator or mentor to invite into <strong id="inviteChannelName" class="text-accent">#channel</strong>.</p>
+      <div id="inviteMembersList" class="flex-col gap-sm" style="max-height: 320px; overflow-y: auto; margin: var(--space-md) 0;"></div>
+      <div class="flex gap-sm">
+        <button type="button" id="closeInviteModal" class="btn btn-ghost w-full">Close</button>
+      </div>
     </div>
   </div>
 
