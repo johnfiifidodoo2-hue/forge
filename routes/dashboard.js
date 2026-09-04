@@ -120,38 +120,56 @@ router.get('/activity', requireAuth, async (req, res) => {
       {
         type: 'mentor',
         icon: '🎓',
-        text: 'Dr. Rose-Mary Gyening published Verilog memory hazard benchmarks for RISC-V SIMD cores',
-        time: new Date(Date.now() - 3600000 * 2),
+        text: 'Dr. Rose-Mary Gyening merged Verilog SIMD opcode 0x7F vector register pipeline tests',
+        time: new Date(Date.now() - 3600000 * 1),
       },
       {
         type: 'funding',
         icon: '🚀',
-        text: 'Sarah Blake approved pitch deck review request for "AirBed & Breakfast"',
-        time: new Date(Date.now() - 3600000 * 5),
+        text: 'Sarah Blake approved YC SAFE term sheet review for AirBed & Breakfast ($500k Seed)',
+        time: new Date(Date.now() - 3600000 * 3),
       },
       {
         type: 'github',
         icon: '⚡',
-        text: 'Alex Rivera pushed 14 commits to "k8s-deploy-pipeline" repository',
-        time: new Date(Date.now() - 3600000 * 8),
+        text: 'Alex Rivera deployed Kubernetes v1.30 ingress controller manifests to AWS EKS (45ms response)',
+        time: new Date(Date.now() - 3600000 * 5),
       },
       {
         type: 'design',
         icon: '🎨',
-        text: 'Amara Osei updated "Figma Global Design System 2024" component tokens',
-        time: new Date(Date.now() - 3600000 * 12),
+        text: 'Amara Osei published Figma Production Design Tokens v2.4 (React + Tailwind CSS)',
+        time: new Date(Date.now() - 3600000 * 7),
       },
       {
         type: 'ai',
         icon: '🧠',
-        text: 'Dr. James Ofosu benchmarked 12ms token latency on Llama-3 70B GPU cluster',
-        time: new Date(Date.now() - 3600000 * 16),
+        text: 'Dr. James Ofosu benchmarked 11.8ms token latency on PyTorch DDP 16x RTX 4090 GPU cluster',
+        time: new Date(Date.now() - 3600000 * 10),
+      },
+      {
+        type: 'fintech',
+        icon: '💳',
+        text: 'Kai Chen pushed commit #7886e9d to Stripe Idempotent Micro-Ledger repository',
+        time: new Date(Date.now() - 3600000 * 14),
+      },
+      {
+        type: 'upvote',
+        icon: '🔥',
+        text: 'Marcus Thorne upvoted "RISC-V Custom Coprocessor for Matrix Acceleration (142 total upvotes)"',
+        time: new Date(Date.now() - 3600000 * 18),
+      },
+      {
+        type: 'security',
+        icon: '🔐',
+        text: 'Elena Vance published resource "Rust zk-SNARK Identity Verification Circuit"',
+        time: new Date(Date.now() - 3600000 * 22),
       },
     ];
 
     activities.push(...staticEvents);
     activities.sort((a, b) => new Date(b.time) - new Date(a.time));
-    res.json({ activities: activities.slice(0, 12) });
+    res.json({ activities: activities.slice(0, 15) });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to load activity feed.' });
