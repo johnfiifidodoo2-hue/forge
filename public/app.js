@@ -270,41 +270,14 @@ document.getElementById('signupTabBtn').addEventListener('click', () => {
   document.getElementById('authError').classList.add('hidden');
 });
 
-// Password visibility toggles
-function setupPasswordToggle(inputId, toggleBtnId, iconId) {
-  const btn = document.getElementById(toggleBtnId);
-  const input = document.getElementById(inputId);
-  const icon = document.getElementById(iconId);
-
-  if (btn && input && icon) {
-    btn.addEventListener('click', () => {
-      const isPassword = input.type === 'password';
-      input.type = isPassword ? 'text' : 'password';
-      icon.textContent = isPassword ? 'visibility_off' : 'visibility';
-    });
-  }
-}
-
-setupPasswordToggle('loginPassword', 'toggleLoginPassword', 'toggleLoginPasswordIcon');
-setupPasswordToggle('signupPassword', 'toggleSignupPassword', 'toggleSignupPasswordIcon');
-
 function showAuthError(message) {
   const el = document.getElementById('authError');
-  const txt = document.getElementById('authErrorText');
-  if (txt) txt.textContent = message;
-  else el.textContent = message;
+  el.textContent = message;
   el.classList.remove('hidden');
 }
 
-async function performLogin(email, password, submitBtnId = 'loginSubmitBtn') {
+async function performLogin(email, password) {
   document.getElementById('authError').classList.add('hidden');
-  const btn = document.getElementById(submitBtnId);
-  const originalText = btn ? btn.innerHTML : '';
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = `<span class="material-symbols-outlined icon-inline">sync</span> Logging in...`;
-  }
-
   try {
     const data = await api('/auth/login', {
       method: 'POST',
@@ -315,11 +288,6 @@ async function performLogin(email, password, submitBtnId = 'loginSubmitBtn') {
     showToast(`Welcome back, ${data.user.name.split(' ')[0]}!`);
   } catch (err) {
     showAuthError(err.message);
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = originalText;
-    }
   }
 }
 
@@ -327,19 +295,12 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('loginEmail').value.trim().toLowerCase();
   const password = document.getElementById('loginPassword').value;
-  await performLogin(email, password, 'loginSubmitBtn');
+  await performLogin(email, password);
 });
 
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   document.getElementById('authError').classList.add('hidden');
-  const btn = document.getElementById('signupSubmitBtn');
-  const originalText = btn ? btn.innerHTML : '';
-  if (btn) {
-    btn.disabled = true;
-    btn.innerHTML = `<span class="material-symbols-outlined icon-inline">sync</span> Creating Account...`;
-  }
-
   try {
     const name = document.getElementById('signupName').value.trim();
     const email = document.getElementById('signupEmail').value.trim().toLowerCase();
@@ -356,25 +317,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     showToast('Account created — welcome to Forge!');
   } catch (err) {
     showAuthError(err.message);
-  } finally {
-    if (btn) {
-      btn.disabled = false;
-      btn.innerHTML = originalText;
-    }
   }
-});
-
-// Demo Login Shortcuts
-document.getElementById('demoCreatorBtn')?.addEventListener('click', async () => {
-  document.getElementById('loginEmail').value = 'creator@forge.dev';
-  document.getElementById('loginPassword').value = 'Password123!';
-  await performLogin('creator@forge.dev', 'Password123!', 'demoCreatorBtn');
-});
-
-document.getElementById('demoExpertBtn')?.addEventListener('click', async () => {
-  document.getElementById('loginEmail').value = 'expert@forge.dev';
-  document.getElementById('loginPassword').value = 'Password123!';
-  await performLogin('expert@forge.dev', 'Password123!', 'demoExpertBtn');
 });
 
 document.getElementById('logoutBtn').addEventListener('click', () => {

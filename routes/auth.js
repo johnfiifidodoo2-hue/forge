@@ -28,12 +28,24 @@ function sanitizeUser(user) {
   return safe;
 }
 
-// Accepts any standard email address string after trimming and lowercasing
 function normalizeEmail(raw) {
   if (typeof raw !== 'string') return null;
   const email = raw.trim().toLowerCase();
   if (!email || !email.includes('@') || email.length < 5) return null;
   return email;
+}
+
+function handleDbError(err, res, actionName) {
+  console.error(`[FORGE AUTH] ${actionName} error:`, err.message || err);
+  const msg = String(err.message || '');
+  if (msg.includes('ENOTFOUND') || msg.includes('DATABASE_URL') || err.code === 'P1001' || err.code === 'P1002' || err.code === 'P1003') {
+    return res.status(500).json({
+      error: 'Unable to connect to database. Please check your DATABASE_URL environment setting on Vercel.',
+    });
+  }
+  return res.status(500).json({
+    error: 'An unexpected server error occurred. Please try again.',
+  });
 }
 
 // POST /api/auth/signup
@@ -56,7 +68,7 @@ router.post('/signup', async (req, res) => {
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      return res.status(409).json({ error: 'An account with that email already exists. Please log in.' });
+      return res.status(409).json({ error: 'An account with that email already exists.' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -75,29 +87,9 @@ router.post('/signup', async (req, res) => {
     const token = signToken(user);
     res.status(201).json({ user: sanitizeUser(user), token });
   } catch (err) {
-    console.error('[FORGE] Signup error:', err.message, err.stack);
-    res.status(500).json({ error: err.message || 'Something went wrong during signup. Please try again.' });
+    return handleDbError(err, res, 'Signup');
   }
 });
-
-// Demo accounts helper to auto-provision if missing
-async function provisionDemoUserIfMissing(email, role = 'CREATOR') {
-  const hashedPassword = await bcrypt.hash('Password123!', 10);
-  const name = role === 'EXPERT' ? 'Alex Rivera (Demo Expert)' : 'Kai Chen (Demo Creator)';
-  const bio = role === 'EXPERT' ? 'Senior Full-Stack Architect & Product Strategist' : 'Indie Developer & UI Specialist';
-  const skills = role === 'EXPERT' ? 'System Design, React, Node.js, Cloud' : 'Figma, Tailwind, React, Express';
-
-  return await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      name,
-      role,
-      bio,
-      skills,
-    },
-  });
-}
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
@@ -106,20 +98,12 @@ router.post('/login', async (req, res) => {
     const email = normalizeEmail(req.body.email);
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Please enter both email and password.' });
+      return res.status(400).json({ error: 'Please enter a valid email and password.' });
     }
 
-    let user = await prisma.user.findUnique({ where: { email } });
-
-    // Auto-provision demo account if missing
-    if (!user && (email === 'creator@forge.dev' || email === 'kai@forge.dev' || email === 'demo@forge.dev')) {
-      user = await provisionDemoUserIfMissing(email, 'CREATOR');
-    } else if (!user && (email === 'expert@forge.dev' || email === 'mentor@forge.dev' || email === 'maya@forge.dev')) {
-      user = await provisionDemoUserIfMissing(email, 'EXPERT');
-    }
-
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return res.status(404).json({ error: 'No account found with this email address. Please click "Sign Up" to create an account.' });
+      return res.status(404).json({ error: 'No account found with this email address. Please click "Sign Up" to register.' });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
@@ -130,8 +114,7 @@ router.post('/login', async (req, res) => {
     const token = signToken(user);
     res.json({ user: sanitizeUser(user), token });
   } catch (err) {
-    console.error('[FORGE] Login error:', err.message, err.stack);
-    res.status(500).json({ error: err.message || 'Something went wrong during login. Please try again.' });
+    return handleDbError(err, res, 'Login');
   }
 });
 
@@ -143,8 +126,7 @@ router.get('/me', requireAuth, async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found.' });
     res.json({ user: sanitizeUser(user) });
   } catch (err) {
-    console.error('[FORGE] Auth me error:', err.message);
-    res.status(500).json({ error: 'Failed to fetch user profile.' });
+    return handleDbError(err, res, 'Auth me');
   }
 });
 
@@ -178,8 +160,7 @@ async function updateProfileHandler(req, res) {
 
     res.json({ user: sanitizeUser(user) });
   } catch (err) {
-    console.error('[FORGE] Update profile error:', err.message);
-    res.status(500).json({ error: 'Failed to update profile.' });
+    return handleDbError(err, res, 'Update profile');
   }
 }
 

@@ -23,137 +23,46 @@
   <!-- ============ AUTH GATE ============ -->
   <div id="authScreen" class="auth-screen">
     <div class="auth-layout">
-
-      <!-- Hero Branding Column -->
       <div class="auth-hero">
-        <div class="auth-brand-badge">
-          <span class="brand-pill orange">FORGE ANTIGRAVITY v2.0</span>
-          <span class="brand-pill blue">CROSS-DISCIPLINARY COLLABORATION</span>
+        <div class="logo">
+          <div class="logo-icon">F</div>
+          <h1 class="logo-text">Forge</h1>
         </div>
-        <div class="logo logo-hero">
-          <div class="logo-icon hero-icon">F</div>
-          <h1 class="logo-text hero-title">Forge</h1>
-        </div>
-        <p class="auth-hero-tagline">Where developers, UI/UX designers, and technical writers pitch ideas, share assets, and build extraordinary software together.</p>
-        
+        <p class="auth-hero-tagline">Where developers, designers, and writers build extraordinary products together.</p>
         <ul class="auth-feature-list">
-          <li>
-            <div class="feature-icon-box orange-glow"><span class="material-symbols-outlined">lightbulb</span></div>
-            <div>
-              <strong>Idea Tank Pitching</strong>
-              <p>Pitch project ideas, gather feedback, and recruit multidisciplinary co-founders.</p>
-            </div>
-          </li>
-          <li>
-            <div class="feature-icon-box blue-glow"><span class="material-symbols-outlined">forum</span></div>
-            <div>
-              <strong>Real-Time Chat & WhatsApp Connect</strong>
-              <p>Live collaboration lounge with direct 1-click WhatsApp instant messaging.</p>
-            </div>
-          </li>
-          <li>
-            <div class="feature-icon-box orange-glow"><span class="material-symbols-outlined">auto_awesome</span></div>
-            <div>
-              <strong>AI Investor Pitch & Cold Email Engine</strong>
-              <p>Transform ideas into VC pitch decks, cold outreach emails, and Superscout payloads.</p>
-            </div>
-          </li>
+          <li><span class="feature-dot"></span> Pitch ideas, run polls & recruit co-creators</li>
+          <li><span class="feature-dot"></span> Real-time Chat Room & WhatsApp Direct Connect</li>
+          <li><span class="feature-dot"></span> AI Investor Pitch & Cold Email Engine</li>
         </ul>
       </div>
 
-      <!-- Auth Form Card Column -->
       <div class="auth-card">
-        <div class="auth-card-header">
-          <h2 class="auth-card-title">Welcome to Forge</h2>
-          <p class="auth-card-subtitle">Sign in to your workspace or create a new account</p>
-        </div>
-
         <div class="auth-tabs">
           <button id="loginTabBtn" class="auth-tab-btn active">Log In</button>
           <button id="signupTabBtn" class="auth-tab-btn">Sign Up</button>
         </div>
 
-        <!-- Error Banner -->
-        <div id="authError" class="auth-error-banner hidden">
-          <span class="material-symbols-outlined">error</span>
-          <span id="authErrorText"></span>
-        </div>
-
-        <!-- Login Form -->
-        <form id="loginForm" class="auth-form-group">
-          <div class="input-with-icon">
-            <span class="material-symbols-outlined input-icon">mail</span>
-            <input required type="email" id="loginEmail" placeholder="Email address" class="form-input auth-input" autocomplete="email" />
-          </div>
-
-          <div class="input-with-icon">
-            <span class="material-symbols-outlined input-icon">lock</span>
-            <input required type="password" id="loginPassword" placeholder="Password" class="form-input auth-input" autocomplete="current-password" />
-            <button type="button" id="toggleLoginPassword" class="password-toggle-btn" title="Toggle password visibility">
-              <span id="toggleLoginPasswordIcon" class="material-symbols-outlined">visibility</span>
-            </button>
-          </div>
-
-          <button type="submit" id="loginSubmitBtn" class="btn btn-primary btn-auth-submit w-full">
-            <span>Log In to Workspace</span>
-            <span class="material-symbols-outlined icon-inline">arrow_forward</span>
-          </button>
+        <form id="loginForm" class="form-group">
+          <input required type="email" id="loginEmail" placeholder="Email address" class="form-input"
+            autocomplete="email" />
+          <input required type="password" id="loginPassword" placeholder="Password" class="form-input"
+            autocomplete="current-password" />
+          <button type="submit" class="btn btn-primary w-full">Log In</button>
         </form>
 
-        <!-- Signup Form -->
-        <form id="signupForm" class="auth-form-group hidden">
-          <div class="input-with-icon">
-            <span class="material-symbols-outlined input-icon">person</span>
-            <input required type="text" id="signupName" placeholder="Full name" class="form-input auth-input" />
-          </div>
-
-          <div class="input-with-icon">
-            <span class="material-symbols-outlined input-icon">mail</span>
-            <input required type="email" id="signupEmail" placeholder="Email address" class="form-input auth-input" />
-          </div>
-
-          <div class="input-with-icon">
-            <span class="material-symbols-outlined input-icon">lock</span>
-            <input required type="password" id="signupPassword" placeholder="Password (min 6 characters)" class="form-input auth-input" />
-            <button type="button" id="toggleSignupPassword" class="password-toggle-btn" title="Toggle password visibility">
-              <span id="toggleSignupPasswordIcon" class="material-symbols-outlined">visibility</span>
-            </button>
-          </div>
-
-          <div class="input-with-icon">
-            <span class="material-symbols-outlined input-icon">badge</span>
-            <select id="signupRole" class="form-select auth-input">
-              <option value="CREATOR">Creator (Developer / UI-UX Designer / Writer)</option>
-              <option value="EXPERT">Expert / Mentor</option>
-            </select>
-          </div>
-
-          <div class="input-with-icon">
-            <span class="material-symbols-outlined input-icon">chat</span>
-            <input type="text" id="signupWhatsapp" placeholder="WhatsApp Number (e.g. +1234567890)" class="form-input auth-input" />
-          </div>
-
-          <button type="submit" id="signupSubmitBtn" class="btn btn-primary btn-auth-submit w-full">
-            <span>Create Free Account</span>
-            <span class="material-symbols-outlined icon-inline">arrow_forward</span>
-          </button>
+        <form id="signupForm" class="form-group hidden">
+          <input required type="text" id="signupName" placeholder="Full name" class="form-input" />
+          <input required type="email" id="signupEmail" placeholder="Email address" class="form-input" />
+          <input required type="password" id="signupPassword" placeholder="Password (min 6 chars)" class="form-input" />
+          <select id="signupRole" class="form-select">
+            <option value="CREATOR">Creator (Developer / Designer / Writer)</option>
+            <option value="EXPERT">Expert / Mentor</option>
+          </select>
+          <input type="text" id="signupWhatsapp" placeholder="WhatsApp Number (+1234567890)" class="form-input" />
+          <button type="submit" class="btn btn-primary w-full">Create Account</button>
         </form>
 
-        <!-- 1-Click Demo Login Shortcuts -->
-        <div class="auth-demo-divider">
-          <span>OR QUICK DEMO ACCESS</span>
-        </div>
-
-        <div class="demo-login-shortcuts">
-          <button type="button" id="demoCreatorBtn" class="btn-demo-shortcut creator">
-            <span class="material-symbols-outlined">bolt</span>
-            <span>Demo Creator</span>
-          </button>
-          <button type="button" id="demoExpertBtn" class="btn-demo-shortcut expert">
-            <span class="material-symbols-outlined">psychology</span>
-            <span>Demo Mentor</span>
-          </button>
-        </div>
+        <p id="authError" class="auth-error hidden"></p>
 
       </div>
     </div>
