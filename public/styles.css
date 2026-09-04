@@ -6,56 +6,56 @@
 
 /* ---------- CSS Custom Properties ---------- */
 :root {
-  /* Default Light Mode Palette - Clean Slate Light (#F8FAFC) & High-Contrast Text (#0F172A) */
+  /* Default Light Mode Palette - Ultra High-Contrast Clean Slate */
   --bg-base: #F8FAFC;
   --bg-surface: #FFFFFF;
   --bg-elevated: #F1F5F9;
   --bg-card: #FFFFFF;
   --bg-card-solid: #FFFFFF;
-  --bg-input: #F1F5F9;
+  --bg-input: #F8FAFC;
   --bg-hover: #E2E8F0;
 
   /* Glass */
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(15, 23, 42, 0.08);
+  --glass-bg: #FFFFFF;
+  --glass-border: rgba(15, 23, 42, 0.12);
   --glass-blur: 20px;
 
-  /* Text */
+  /* Text - High Contrast Legibility */
   --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-tertiary: #64748B;
+  --text-secondary: #1E293B;
+  --text-tertiary: #334155;
   --text-inverse: #FFFFFF;
 
   /* Accent — Orange / Amber Gradient */
-  --accent: #f97316;
-  --accent-hover: #fb923c;
-  --accent-glow: rgba(249, 115, 22, 0.28);
-  --accent-subtle: rgba(249, 115, 22, 0.12);
+  --accent: #ea580c;
+  --accent-hover: #c2410c;
+  --accent-glow: rgba(234, 88, 12, 0.28);
+  --accent-subtle: rgba(234, 88, 12, 0.12);
 
   /* Secondary — Violet / Indigo */
-  --secondary: #8b5cf6;
-  --secondary-hover: #a78bfa;
-  --secondary-glow: rgba(139, 92, 246, 0.25);
-  --secondary-subtle: rgba(139, 92, 246, 0.12);
+  --secondary: #7c3aed;
+  --secondary-hover: #6d28d9;
+  --secondary-glow: rgba(124, 58, 237, 0.25);
+  --secondary-subtle: rgba(124, 58, 237, 0.12);
 
   /* Cyan / Teal highlights */
-  --teal: #14b8a6;
-  --teal-subtle: rgba(20, 184, 166, 0.12);
+  --teal: #0d9488;
+  --teal-subtle: rgba(13, 148, 136, 0.12);
 
   /* Status */
-  --success: #10b981;
-  --success-subtle: rgba(16, 185, 129, 0.15);
-  --warning: #f59e0b;
-  --warning-subtle: rgba(245, 158, 11, 0.15);
-  --info: #3b82f6;
-  --info-subtle: rgba(59, 130, 246, 0.15);
-  --danger: #ef4444;
-  --danger-subtle: rgba(239, 68, 68, 0.15);
+  --success: #059669;
+  --success-subtle: rgba(5, 150, 105, 0.15);
+  --warning: #d97706;
+  --warning-subtle: rgba(217, 119, 6, 0.15);
+  --info: #2563eb;
+  --info-subtle: rgba(37, 99, 235, 0.15);
+  --danger: #dc2626;
+  --danger-subtle: rgba(220, 38, 38, 0.15);
 
   /* Borders */
-  --border: #E2E8F0;
-  --border-light: #CBD5E1;
-  --border-accent: rgba(249, 115, 22, 0.35);
+  --border: #CBD5E1;
+  --border-light: #94A3B8;
+  --border-accent: rgba(234, 88, 12, 0.35);
 
 
   /* Radii */
@@ -1974,6 +1974,86 @@ body, div, nav, header, main, section, article, sidebar, input, select, textarea
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* ============================================================
+   GITHUB INTEGRATION & CHAT CHANNEL ENHANCEMENTS
+   ============================================================ */
+.btn-github-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #24292e;
+  color: #ffffff !important;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-size: 12px;
+  transition: transform 150ms ease, background 150ms ease;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.btn-github-code:hover {
+  background: #000000;
+  transform: translateY(-1px);
+}
+
+.github-connected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(36, 41, 46, 0.1);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+:root.dark .github-connected-badge {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.chat-channel-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 150ms ease;
+  border: 1px solid transparent;
+  margin-bottom: 4px;
+}
+.chat-channel-item:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.chat-channel-item.active {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border-color: var(--accent-glow);
+  font-weight: 700;
+}
+
+.category-group-header {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: var(--space-xs);
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-xs);
+}
+
 
 
 

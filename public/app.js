@@ -812,15 +812,41 @@ function renderIdeaCard(p, index) {
 // REAL-TIME CHAT ROOM
 // ============================================================
 
+const CHANNEL_META = {
+  'general-collaboration': { title: '# general-collaboration', sub: 'Public Cross-Disciplinary Lounge' },
+  'comp-arch-hardware': { title: '# comp-arch-hardware', sub: 'Computer Architecture, RISC-V & Hardware Pipelining' },
+  'fundraising-vcs': { title: '# fundraising-vcs', sub: 'Startup Pitch Decks & VC Investor Insights' },
+  'devops-cloud': { title: '# devops-cloud', sub: 'Kubernetes, AWS, Vercel & Infrastructure' },
+  'ai-ml-models': { title: '# ai-ml-models', sub: 'PyTorch, CUDA & Edge AI Optimization' },
+};
+
+document.getElementById('chatChannelList')?.addEventListener('click', (e) => {
+  const item = e.target.closest('.chat-channel-item');
+  if (!item) return;
+  const channel = item.dataset.channel;
+  if (!channel) return;
+
+  document.querySelectorAll('#chatChannelList .chat-channel-item').forEach((el) => el.classList.remove('active'));
+  item.classList.add('active');
+
+  state.activeChannel = channel;
+  const meta = CHANNEL_META[channel] || { title: `# ${channel}`, sub: 'Discussion Channel' };
+  document.getElementById('activeChannelTitle').textContent = meta.title;
+  document.getElementById('activeChannelSubtitle').textContent = meta.sub;
+
+  loadChatMessages();
+});
+
 async function loadChatMessages() {
   const box = document.getElementById('chatMessagesBox');
   const userList = document.getElementById('chatUserList');
+  const roomId = state.activeChannel || 'general-collaboration';
 
   try {
-    const { messages } = await api('/chat/messages?roomId=global');
+    const { messages } = await api(`/chat/messages?roomId=${encodeURIComponent(roomId)}`);
 
     if (!messages.length) {
-      box.innerHTML = '<p style="text-align:center; color:var(--text-tertiary); margin:auto;">No messages yet. Be the first to start the conversation!</p>';
+      box.innerHTML = `<p style="text-align:center; color:var(--text-tertiary); margin:auto;">No messages in this channel yet. Be the first to start the discussion!</p>`;
     } else {
       const isScrolledToBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 50;
 
@@ -882,10 +908,12 @@ document.getElementById('chatForm')?.addEventListener('submit', async (e) => {
   const content = input.value.trim();
   if (!content) return;
 
+  const roomId = state.activeChannel || 'general-collaboration';
+
   try {
     await api('/chat/messages', {
       method: 'POST',
-      body: JSON.stringify({ content, roomId: 'global' }),
+      body: JSON.stringify({ content, roomId }),
     });
     input.value = '';
     loadChatMessages();
@@ -1085,7 +1113,29 @@ async function loadResources() {
       return;
     }
 
-    grid.innerHTML = resources.map((r, i) => renderResourceCard(r, i)).join('');
+    if (!state.activeCategory && state.resFilter === 'all' && !search) {
+      // Group resources by Category
+      const grouped = {};
+      resources.forEach((r) => {
+        const cat = r.category || 'OTHER';
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(r);
+      });
+
+      let html = '';
+      let index = 0;
+      Object.keys(grouped).forEach((catKey) => {
+        const label = CATEGORY_LABELS[catKey] || catKey;
+        html += `<div class="category-group-header">
+          <span class="material-symbols-outlined text-accent" style="font-size:20px;">folder</span>
+          ${escapeHtml(label)} Resources (${grouped[catKey].length})
+        </div>`;
+        html += grouped[catKey].map((r) => renderResourceCard(r, index++)).join('');
+      });
+      grid.innerHTML = html;
+    } else {
+      grid.innerHTML = resources.map((r, i) => renderResourceCard(r, i)).join('');
+    }
 
     resources.forEach((r) => {
       const bBtn = document.getElementById(`bookmark-${r.id}`);
@@ -1114,6 +1164,15 @@ function toggleBookmarkResource(resId) {
 function renderResourceCard(r, index) {
   const cssClass = CATEGORY_CSS[r.category] || '';
   const isSaved = state.savedResources.includes(r.id);
+  const codeUrl = r.githubUrl || r.downloadUrl;
+
+  const codeBtn = codeUrl
+    ? `<a href="${encodeURI(codeUrl)}" target="_blank" rel="noopener noreferrer" class="btn-github-code" style="margin-right:auto;">
+        <svg height="13" width="13" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:middle;">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg> View GitHub Code ↗
+       </a>`
+    : '';
 
   return `
   <div class="glass-card resource-card card-animated" style="${staggerDelay(index)}">
@@ -1123,11 +1182,12 @@ function renderResourceCard(r, index) {
     <span class="category-badge ${cssClass}">${CATEGORY_LABELS[r.category] || r.category}</span>
     <h3 class="resource-title">${escapeHtml(r.title)}</h3>
     <p class="resource-description">${escapeHtml(r.description)}</p>
-    <div class="resource-footer">
-      <span class="text-xs text-tertiary">Verified Resource</span>
-      <a href="${encodeURI(r.downloadUrl)}" target="_blank" rel="noopener noreferrer" class="btn-download">Open Resource ↗</a>
+    <div class="resource-footer" style="flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center;">
+      ${codeBtn}
+      <a href="${encodeURI(r.downloadUrl)}" target="_blank" rel="noopener noreferrer" class="btn-download">Open Docs ↗</a>
     </div>
   </div>`;
+}
 }
 
 // ============================================================
@@ -1346,10 +1406,39 @@ function renderBookingRow(b, index) {
   </div>`;
 }
 
+function updateGithubBadge() {
+  const container = document.getElementById('githubHeaderBadge');
+  if (!container) return;
+  const username = state.githubUsername || localStorage.getItem('forge_github_user') || 'johnfiifidodoo2-hue';
+  if (username) {
+    container.innerHTML = `
+      <a href="https://github.com/${escapeHtml(username)}" target="_blank" rel="noopener noreferrer" class="github-connected-badge">
+        <svg height="14" width="14" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:middle;">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.28.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg> Connected: @${escapeHtml(username)}
+      </a>`;
+    container.classList.remove('hidden');
+  } else {
+    container.classList.add('hidden');
+  }
+}
+
+document.getElementById('connectGithubBtn')?.addEventListener('click', () => {
+  const input = document.getElementById('profileGithubUsername');
+  const val = (input && input.value.trim()) || 'johnfiifidodoo2-hue';
+  state.githubUsername = val;
+  localStorage.setItem('forge_github_user', val);
+  updateGithubBadge();
+  const statusEl = document.getElementById('githubConnectStatus');
+  if (statusEl) statusEl.textContent = `✅ Successfully connected GitHub account: @${val}`;
+  showToast(`GitHub account @${val} connected!`);
+});
+
 // ---------- Boot ----------
 
 (async function boot() {
   applyTheme(state.theme);
+  updateGithubBadge();
   if (state.token) {
     await validateSession();
   }

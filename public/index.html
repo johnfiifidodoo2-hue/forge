@@ -318,16 +318,31 @@
 
           <div class="chat-container">
             <div class="chat-sidebar">
-              <h4 style="font-size:14px; font-weight:700; color:var(--text-secondary);">Active Room</h4>
-              <div class="user-chip">
-                <span class="material-symbols-outlined text-accent">forum</span>
-                <div>
-                  <strong style="display:block; font-size:13px;">#global-lounge</strong>
-                  <span style="font-size:11px; color:var(--text-tertiary);">Public Collaboration</span>
+              <h4 style="font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-tertiary); margin-bottom: var(--space-xs);">Discussion Channels</h4>
+              <div id="chatChannelList" class="flex-col gap-xs">
+                <div class="chat-channel-item active" data-channel="general-collaboration">
+                  <span class="material-symbols-outlined text-accent" style="font-size:18px;">forum</span>
+                  <span># general-collaboration</span>
+                </div>
+                <div class="chat-channel-item" data-channel="comp-arch-hardware">
+                  <span class="material-symbols-outlined text-accent" style="font-size:18px;">memory</span>
+                  <span># comp-arch-hardware</span>
+                </div>
+                <div class="chat-channel-item" data-channel="fundraising-vcs">
+                  <span class="material-symbols-outlined text-accent" style="font-size:18px;">payments</span>
+                  <span># fundraising-vcs</span>
+                </div>
+                <div class="chat-channel-item" data-channel="devops-cloud">
+                  <span class="material-symbols-outlined text-accent" style="font-size:18px;">cloud</span>
+                  <span># devops-cloud</span>
+                </div>
+                <div class="chat-channel-item" data-channel="ai-ml-models">
+                  <span class="material-symbols-outlined text-accent" style="font-size:18px;">psychology</span>
+                  <span># ai-ml-models</span>
                 </div>
               </div>
 
-              <h4 style="font-size:14px; font-weight:700; color:var(--text-secondary); margin-top:var(--space-md);">Community Members</h4>
+              <h4 style="font-size:13px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-tertiary); margin-top:var(--space-md); margin-bottom: var(--space-xs);">Active Mentors & Creators</h4>
               <div id="chatUserList" class="chat-active-users">
                 <p style="font-size:12px; color:var(--text-tertiary);">Loading active members...</p>
               </div>
@@ -337,17 +352,17 @@
               <div class="chat-header-bar">
                 <div class="flex items-center gap-sm">
                   <span class="material-symbols-outlined text-accent">chat_bubble</span>
-                  <strong style="font-size:15px;">#global-lounge</strong>
+                  <strong id="activeChannelTitle" style="font-size:15px;"># general-collaboration</strong>
                 </div>
-                <span style="font-size:12px; color:var(--text-tertiary);">Real-time Supabase Engine</span>
+                <span id="activeChannelSubtitle" style="font-size:12px; color:var(--text-tertiary);">Public Cross-Disciplinary Lounge</span>
               </div>
 
               <div id="chatMessagesBox" class="chat-messages-box">
-                <p style="text-align:center; color:var(--text-tertiary); margin:auto;">Loading real-time conversation...</p>
+                <p style="text-align:center; color:var(--text-tertiary); margin:auto;">Loading channel discussion...</p>
               </div>
 
               <form id="chatForm" class="chat-input-bar">
-                <input required id="chatInput" type="text" placeholder="Type your message to the room..." />
+                <input required id="chatInput" type="text" placeholder="Discuss hardware specs, platform architecture, or tag @mentor..." />
                 <button type="submit" class="btn btn-primary">Send</button>
               </form>
             </div>
@@ -559,7 +574,16 @@
         <label class="form-label">Portfolio / Website Link</label>
         <input id="profilePortfolioUrl" placeholder="https://yourwebsite.dev" class="form-input" />
 
-        <label class="form-label">WhatsApp Number (International format)</label>
+        <label class="form-label">Connect GitHub Account (Username)</label>
+        <div class="flex gap-sm">
+          <input id="profileGithubUsername" placeholder="e.g. johnfiifidodoo2-hue or octocat" class="form-input" style="flex:1;" />
+          <button type="button" id="connectGithubBtn" class="btn-github-code" style="padding: 6px 14px; white-space:nowrap;">
+            Connect GitHub
+          </button>
+        </div>
+        <p id="githubConnectStatus" style="font-size:12px; color:var(--text-tertiary); margin-top:2px;"></p>
+
+        <label class="form-label" style="margin-top: 8px;">WhatsApp Number (International format)</label>
         <input id="profileWhatsapp" placeholder="+1234567890" class="form-input" />
 
         <div class="flex gap-sm" style="margin-top: 12px;">
