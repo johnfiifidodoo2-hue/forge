@@ -1188,7 +1188,6 @@ function renderResourceCard(r, index) {
     </div>
   </div>`;
 }
-}
 
 // ============================================================
 // EXPERT BOOKING & SESSIONS
