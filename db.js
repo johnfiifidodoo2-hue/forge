@@ -354,6 +354,15 @@ const store = {
       sharedById: 2,
       createdAt: new Date('2024-04-10T09:30:00Z'),
     },
+    {
+      id: 33,
+      title: 'lowRISC SoC Design Platform (ibex RISC-V Core)',
+      description: 'Industrial-grade open-source RISC-V 32-bit embedded processor core in SystemVerilog used by Google OpenTitan silicon.',
+      url: 'https://lowrisc.org/',
+      category: 'HARDWARE',
+      sharedById: 2,
+      createdAt: new Date('2024-04-20T10:00:00Z'),
+    },
 
     // ── STARTUP & FUNDING TEMPLATES (5+ WORKING EXAMPLES) ──
     {

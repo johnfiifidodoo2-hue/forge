@@ -930,24 +930,45 @@ kbd {
 }
 .activity-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   padding: 10px 12px;
   border-radius: var(--radius-md);
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border);
   font-size: 12px;
+  transition: background var(--transition-fast);
+}
+.activity-item:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 .activity-icon {
   font-size: 16px;
+  flex-shrink: 0;
+}
+.activity-icon-bubble {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  border: 1px solid var(--border);
+  font-size: 15px;
+  flex-shrink: 0;
+  line-height: 1;
 }
 .activity-text {
   flex: 1;
   color: var(--text-secondary);
+  line-height: 1.4;
 }
 .activity-time {
   font-size: 10px;
   color: var(--text-tertiary);
+  margin-top: 3px;
 }
 
 .recent-list {
