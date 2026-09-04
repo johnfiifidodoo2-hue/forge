@@ -55,8 +55,8 @@ const store = {
       name: 'Dr. Rose-Mary Gyening',
       password: DEMO_HASH,
       role: 'EXPERT',
-      bio: 'Lecturer for Computer Architecture with extensive industry and academic experience.',
-      skills: 'Computer Architecture, Hardware, Mentorship, Engineering',
+      bio: 'Lecturer for Computer Architecture. Expert in processor design, pipeline optimization, memory hierarchies, and RISC-V instruction sets.',
+      skills: 'Computer Architecture, RISC-V, Pipeline Design, Memory Systems, Hardware Engineering',
       portfolioUrl: 'https://example.edu/faculty/rose-mary-gyening',
       whatsappNumber: 'rosygyening',
       preferredTheme: 'DARK',
@@ -68,8 +68,8 @@ const store = {
       name: 'Sarah Blake',
       password: DEMO_HASH,
       role: 'EXPERT',
-      bio: 'Partner at Antigravity Capital. Interested in deep tech, AI, and SaaS platforms.',
-      skills: 'Venture Capital, Go-To-Market, Fundraising, Strategy',
+      bio: 'Partner at Antigravity Capital. 12+ years in venture capital across AI, SaaS, and deep tech. Former Y Combinator batch mentor.',
+      skills: 'Venture Capital, Fundraising, Go-To-Market, Pitch Decks, Strategy',
       portfolioUrl: 'https://superscout.co',
       whatsappNumber: '+1987654322',
       preferredTheme: 'LIGHT',
@@ -81,10 +81,36 @@ const store = {
       name: 'Alex Rivera',
       password: DEMO_HASH,
       role: 'EXPERT',
-      bio: 'DevOps & Cloud Infrastructure Architect. AWS Certified.',
-      skills: 'Docker, Kubernetes, AWS, CI/CD',
+      bio: 'Cloud Infrastructure & DevOps Architect. AWS Certified Solutions Architect. Helped 30+ startups scale to millions of users.',
+      skills: 'Docker, Kubernetes, AWS, CI/CD, Terraform, Microservices',
       portfolioUrl: 'https://github.com/alexrivera',
       whatsappNumber: '+1987654323',
+      preferredTheme: 'DARK',
+      createdAt: new Date(),
+    },
+    {
+      id: 5,
+      email: 'ux@forge.dev',
+      name: 'Amara Osei',
+      password: DEMO_HASH,
+      role: 'EXPERT',
+      bio: 'Lead UX Designer at Google Design. Specialises in design systems, user research, and Figma component libraries for SaaS products.',
+      skills: 'UX Research, Figma, Design Systems, Prototyping, Product Design',
+      portfolioUrl: 'https://dribbble.com',
+      whatsappNumber: '+233501234567',
+      preferredTheme: 'LIGHT',
+      createdAt: new Date(),
+    },
+    {
+      id: 6,
+      email: 'aiml@forge.dev',
+      name: 'Dr. James Ofosu',
+      password: DEMO_HASH,
+      role: 'EXPERT',
+      bio: 'AI/ML Research Scientist. Published in NeurIPS and ICML. Expert in neural network optimization, edge AI, and model compression.',
+      skills: 'Machine Learning, Python, TensorFlow, PyTorch, Edge AI, NLP',
+      portfolioUrl: 'https://github.com',
+      whatsappNumber: '+233201234567',
       preferredTheme: 'DARK',
       createdAt: new Date(),
     },
@@ -141,25 +167,25 @@ const store = {
       description: 'The React Framework for the Web. Learn about App Router, Server Actions, and more.',
       url: 'https://nextjs.org/docs',
       category: 'GUIDE',
-      sharedById: 2,
+      sharedById: 1,
       createdAt: new Date(),
     },
     {
       id: 2,
-      title: 'Prisma ORM Crash Course',
-      description: 'Learn how to use Prisma with PostgreSQL in this comprehensive YouTube tutorial.',
+      title: 'Prisma ORM Full Course (YouTube)',
+      description: 'Learn how to use Prisma with PostgreSQL in this comprehensive YouTube tutorial by Traversy Media.',
       url: 'https://www.youtube.com/watch?v=RebA5J-rlwg',
       category: 'TOOL',
-      sharedById: 2,
+      sharedById: 1,
       createdAt: new Date(),
     },
     {
       id: 3,
       title: 'Tailwind CSS UI Kit',
-      description: 'Beautifully designed, fully responsive UI components built with Tailwind.',
+      description: 'Beautifully designed, fully responsive UI components built with Tailwind CSS.',
       url: 'https://tailwindui.com/',
       category: 'UI_KIT',
-      sharedById: 2,
+      sharedById: 1,
       createdAt: new Date(),
     },
     {
@@ -191,14 +217,60 @@ const store = {
     },
     {
       id: 7,
-      title: 'Computer Architecture: A Quantitative Approach',
-      description: 'The definitive textbook for computer architecture and hardware engineering fundamentals.',
+      title: 'Computer Architecture: A Quantitative Approach (Book)',
+      description: 'The definitive textbook for computer architecture by Hennessy & Patterson. Essential for hardware engineers.',
       url: 'https://www.elsevier.com/books/computer-architecture/hennessy/978-0-12-811905-1',
       category: 'GUIDE',
-      sharedById: 2,
+      sharedById: 1,
       createdAt: new Date(),
-    }
+    },
+    {
+      id: 8,
+      title: 'RISC-V Instruction Set Spec (Official)',
+      description: 'The official open-source RISC-V specification. Use this to build hardware, compilers, and OS kernels.',
+      url: 'https://riscv.org/technical/specifications/',
+      category: 'GUIDE',
+      sharedById: 1,
+      createdAt: new Date(),
+    },
+    {
+      id: 9,
+      title: 'Figma — Free Starter UI Kit',
+      description: 'Material 3 Design Kit for Figma. Real production-grade Figma components maintained by Google.',
+      url: 'https://www.figma.com/community/file/1035203688168086460',
+      category: 'UI_KIT',
+      sharedById: 5,
+      createdAt: new Date(),
+    },
+    {
+      id: 10,
+      title: 'AngelList Venture — Raise a Round',
+      description: 'Launch your startup syndicate, raise a rolling fund, or connect with angel investors on AngelList.',
+      url: 'https://venture.angellist.com/',
+      category: 'GUIDE',
+      sharedById: 3,
+      createdAt: new Date(),
+    },
+    {
+      id: 11,
+      title: 'Next.js App Router Starter Template',
+      description: 'Official Vercel Next.js 14 starter with App Router, TypeScript, Tailwind, and Prisma pre-configured.',
+      url: 'https://github.com/vercel/next.js/tree/canary/examples/with-prisma',
+      category: 'TEMPLATE',
+      sharedById: 1,
+      createdAt: new Date(),
+    },
+    {
+      id: 12,
+      title: 'React Native Full Course 2024 (YouTube)',
+      description: 'Build cross-platform mobile apps with React Native — from zero to production by Expo.',
+      url: 'https://www.youtube.com/watch?v=ZBCUegTZF7M',
+      category: 'TOOL',
+      sharedById: 1,
+      createdAt: new Date(),
+    },
   ],
+
   bookings: [],
   notifications: [],
   chatMessages: [
@@ -393,35 +465,26 @@ function attachRelations(item, storeKey, include) {
   if (!item || !include) return item;
   const res = { ...item };
 
-  if (include.sender || include.owner || include.author || include.creator || include.expert || include.sharedBy) {
-    const userId = item.senderId || item.ownerId || item.authorId || item.creatorId || item.expertId || item.sharedById;
-    const u = store.users.find((x) => x.id === userId) || store.users[0];
-    if (include.sender) res.sender = u;
-    if (include.owner) res.owner = u;
-    if (include.author) res.author = u;
-    if (include.creator) res.creator = u;
-    if (include.expert) res.expert = u;
-    if (include.sharedBy) res.sharedBy = u;
-  }
-
-  if (include.creator) {
-    res.creator = store.users.find((x) => x.id === item.creatorId) || store.users[0];
-  }
-  if (include.expert) {
-    res.expert = store.users.find((x) => x.id === item.expertId) || store.users[1];
-  }
+  // Resolve each relation from its specific FK field — avoids wrong user being attached
+  if (include.sender)   res.sender   = store.users.find((x) => x.id === item.senderId)   || null;
+  if (include.owner)    res.owner    = store.users.find((x) => x.id === item.ownerId)    || null;
+  if (include.author)   res.author   = store.users.find((x) => x.id === item.authorId)   || null;
+  if (include.creator)  res.creator  = store.users.find((x) => x.id === item.creatorId)  || null;
+  if (include.expert)   res.expert   = store.users.find((x) => x.id === item.expertId)   || null;
+  if (include.sharedBy) res.sharedBy = store.users.find((x) => x.id === item.sharedById) || null;
 
   if (include.comments) {
     res.comments = store.comments
       .filter((c) => c.projectId === item.id)
       .map((c) => ({
         ...c,
-        author: store.users.find((u) => u.id === c.authorId) || store.users[0],
+        author: store.users.find((u) => u.id === c.authorId) || null,
       }));
   }
 
   return res;
 }
+
 
 // Resilient DB Export Object
 const db = {

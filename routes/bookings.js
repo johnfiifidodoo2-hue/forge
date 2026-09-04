@@ -19,6 +19,7 @@ function shapeExpert(expert, ratingInfo) {
     email: expert.email,
     bio: expert.bio || '',
     skills: parseSkills(expert.skills),
+    whatsappNumber: expert.whatsappNumber || '',
     createdAt: expert.createdAt,
     averageRating: ratingInfo?.averageRating ?? null,
     reviewCount: ratingInfo?.reviewCount ?? 0,
@@ -33,7 +34,7 @@ router.get('/experts', async (req, res) => {
 
     const experts = await prisma.user.findMany({
       where: { role: 'EXPERT' },
-      select: { id: true, name: true, email: true, bio: true, skills: true, createdAt: true },
+      select: { id: true, name: true, email: true, bio: true, skills: true, whatsappNumber: true, createdAt: true },
       orderBy: { name: 'asc' },
     });
 
