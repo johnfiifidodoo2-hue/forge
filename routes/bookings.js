@@ -34,24 +34,30 @@ router.get('/experts', async (req, res) => {
 
     const experts = await prisma.user.findMany({
       where: { role: 'EXPERT' },
-      select: { id: true, name: true, email: true, bio: true, skills: true, whatsappNumber: true, createdAt: true },
       orderBy: { name: 'asc' },
     });
 
-    const expertIds = experts.map((e) => e.id);
-    const [ratingRows, followerRows] = await Promise.all([
-      prisma.booking.groupBy({
-        by: ['expertId'],
-        where: { expertId: { in: expertIds }, status: 'COMPLETED', rating: { not: null } },
-        _avg: { rating: true },
-        _count: { rating: true },
-      }),
-      prisma.follow.groupBy({
-        by: ['followingId'],
-        where: { followingId: { in: expertIds } },
-        _count: { followingId: true },
-      }),
-    ]);
+    // groupBy is only available in Postgres — gracefully skip when using memory store
+    let ratingRows = [];
+    let followerRows = [];
+    try {
+      const expertIds = experts.map((e) => e.id);
+      [ratingRows, followerRows] = await Promise.all([
+        prisma.booking.groupBy({
+          by: ['expertId'],
+          where: { expertId: { in: expertIds }, status: 'COMPLETED', rating: { not: null } },
+          _avg: { rating: true },
+          _count: { rating: true },
+        }),
+        prisma.follow.groupBy({
+          by: ['followingId'],
+          where: { followingId: { in: expertIds } },
+          _count: { followingId: true },
+        }),
+      ]);
+    } catch (_) {
+      // memory store fallback — no rating/follower data available
+    }
 
     const ratingMap = {};
     ratingRows.forEach((r) => {

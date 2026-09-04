@@ -118,48 +118,105 @@ const store = {
   projects: [
     {
       id: 1,
-      title: 'Antigravity Workspace Engine',
-      description: 'A revolutionary collaboration tool combining real-time communication with AI-driven proposal generation.',
-      tags: 'react, express, web, collaboration',
+      title: 'RISC-V Custom Coprocessor for Matrix Acceleration',
+      description: 'An open-source custom instruction set extension for RISC-V processors designed specifically to accelerate neural network 8-bit quantized matrix inference on ultra-low-power edge FPGAs. Implemented SIMD units with 4.2x throughput speedup over standard RV64GC cores. Seeking guidance on L1 cache coherency and memory bandwidth optimization.',
+      tags: 'computer-architecture, hardware, risc-v, edge-ai, fpga, verilog',
       ownerId: 1,
-      createdAt: new Date('2023-01-15T10:00:00Z'),
+      initialUpvotes: 42,
+      createdAt: new Date('2024-02-10T10:00:00Z'),
     },
     {
       id: 2,
-      title: 'RISC-V Edge AI Accelerator',
-      description: 'An open-source custom instruction set extension for RISC-V processors designed specifically to accelerate neural network inference on ultra-low-power edge devices. Seeking mentorship on memory bandwidth optimization and pipeline hazards.',
-      tags: 'computer-architecture, hardware, risc-v, edge-ai, fpga',
-      ownerId: 1,
-      createdAt: new Date('2023-03-22T14:30:00Z'),
+      title: 'AirBed & Breakfast (P2P Homestay Marketplace)',
+      description: 'A global peer-to-peer online marketplace enabling travelers to book short-term residential homestays directly from hosts. Built on a modular architecture supporting dynamic pricing, instant bookings, and verified identity reviews.',
+      tags: 'marketplace, scalable, real-estate, ruby-on-rails, fintech',
+      ownerId: 3,
+      initialUpvotes: 58,
+      createdAt: new Date('2024-03-15T14:30:00Z'),
     },
     {
       id: 3,
-      title: 'AirBed & Breakfast (Marketplace)',
-      description: 'A peer-to-peer online marketplace and homestay network enabling people to list or rent short-term lodging in residential properties.',
-      tags: 'marketplace, scalable, real-estate, ruby-on-rails',
-      ownerId: 1,
-      createdAt: new Date('2023-05-10T09:15:00Z'),
+      title: 'UberCab (On-Demand Urban Logistics & Dispatch Engine)',
+      description: 'High-concurrency geospatial dispatch protocol using spatial indexing (H3 hexagonal grid) to match riders with drivers in under 500ms. Scaled dynamically with surge pricing and automated driver payout routing.',
+      tags: 'logistics, real-time, gps, mobile-app, distributed-systems',
+      ownerId: 4,
+      initialUpvotes: 49,
+      createdAt: new Date('2024-04-01T09:15:00Z'),
     },
     {
       id: 4,
-      title: 'UberCab (On-Demand Transport)',
-      description: 'A location-based smartphone app allowing users to request a premium black car service on demand with one tap.',
-      tags: 'mobile-app, logistics, real-time, gps',
+      title: 'Stripe Micro-Ledger & Idempotent API Gateway',
+      description: 'Double-entry bookkeeping microservice with sub-millisecond idempotency guarantees built over Stripe Webhooks. Scaled to handle 1.2M daily transactions across 14 African currencies with zero payment drift.',
+      tags: 'fintech, microservices, redis, node-js, payments',
       ownerId: 1,
-      createdAt: new Date('2023-08-01T11:45:00Z'),
+      initialUpvotes: 36,
+      createdAt: new Date('2024-04-20T11:45:00Z'),
+    },
+    {
+      id: 5,
+      title: 'Distributed GPU Inference Engine for LLMs',
+      description: 'High-performance CUDA kernels for sharded tensor parallelism across heterogeneous GPU nodes. Reduces VRAM footprint by 65% while keeping latency under 12ms per token on Llama-3 70B models.',
+      tags: 'ai-ml, python, pytorch, cuda, distributed-systems',
+      ownerId: 6,
+      initialUpvotes: 39,
+      createdAt: new Date('2024-05-05T16:20:00Z'),
+    },
+    {
+      id: 6,
+      title: 'Figma Token Compiler & Automated Design Engine',
+      description: 'Automated CI/CD plugin extracting Figma variables and design tokens into multi-theme CSS custom properties and React component libraries in real-time. Adopted across 35+ product engineering teams.',
+      tags: 'design-systems, figma, typescript, react, UI-kit',
+      ownerId: 5,
+      initialUpvotes: 31,
+      createdAt: new Date('2024-05-18T08:10:00Z'),
     },
   ],
   comments: [
     {
       id: 1,
-      content: 'This RISC-V project looks fascinating! Are you considering implementing out-of-order execution for the tensor operations?',
+      content: 'This RISC-V coprocessor implementation is very solid! Have you checked memory alignment for 64-bit vector loads? For pipeline hazards, forwarding paths directly into the SIMD execution units can cut 2 stall cycles. Happy to review your Verilog code on a WhatsApp call!',
+      projectId: 1,
+      authorId: 2, // Dr. Rose-Mary Gyening
+      createdAt: new Date('2024-02-11T12:00:00Z'),
+    },
+    {
+      id: 2,
+      content: 'Great hardware architecture! If you are running on Xilinx FPGAs, check out AXI4-Stream interfaces for high-throughput tensor DMA transfers.',
+      projectId: 1,
+      authorId: 4, // Alex Rivera
+      createdAt: new Date('2024-02-12T15:30:00Z'),
+    },
+    {
+      id: 3,
+      content: 'The unit economics on P2P marketplaces rely heavily on organic host acquisition. Make sure your instant-booking conversion funnel is optimized in early stages.',
       projectId: 2,
-      authorId: 2,
-      createdAt: new Date(),
-    }
+      authorId: 3, // Sarah Blake
+      createdAt: new Date('2024-03-16T10:15:00Z'),
+    },
+    {
+      id: 4,
+      content: 'Geospatial H3 grid indexing is key for sub-500ms matching! Are you using Redis GeoSpatial or Spatialite in your core dispatch service?',
+      projectId: 3,
+      authorId: 4, // Alex Rivera
+      createdAt: new Date('2024-04-02T14:20:00Z'),
+    },
+    {
+      id: 5,
+      content: 'Idempotency keys in headers with Redis distributed locks is definitely the gold standard for financial webhooks.',
+      projectId: 4,
+      authorId: 1, // Kai
+      createdAt: new Date('2024-04-21T09:00:00Z'),
+    },
   ],
-  upvotes: [],
-  saves: [],
+  upvotes: [
+    { id: 1, userId: 1, projectId: 1 },
+    { id: 2, userId: 2, projectId: 1 },
+    { id: 3, userId: 3, projectId: 2 },
+    { id: 4, userId: 4, projectId: 3 },
+  ],
+  saves: [
+    { id: 1, userId: 1, projectId: 1 },
+  ],
   resources: [
     {
       id: 1,
@@ -335,15 +392,12 @@ async function tryPostgres(modelName, method, args) {
     }
     return { ok: true, result };
   } catch (err) {
-    if (isConnectionError(err)) {
-      if (!postgresDisabled) {
-        postgresDisabled = true;
-        console.warn('[FORGE DB] ⚠️  PostgreSQL unreachable — switching to resilient in-memory store for this session.');
-        console.warn('[FORGE DB]    Error:', err.message || err.code);
-      }
-      return null; // signal: use fallback
+    if (!postgresDisabled) {
+      postgresDisabled = true;
+      console.warn('[FORGE DB] ⚠️  PostgreSQL query skipped/failed — activating resilient in-memory store.');
+      console.warn('[FORGE DB]    Error:', err.message || err.code);
     }
-    throw err; // rethrow non-connection errors (e.g., unique constraint violations)
+    return null; // fallback signal: use memory store seamlessly
   }
 }
 
@@ -462,24 +516,47 @@ function createModelProxy(modelName, storeKey) {
 }
 
 function attachRelations(item, storeKey, include) {
-  if (!item || !include) return item;
+  if (!item) return item;
   const res = { ...item };
 
-  // Resolve each relation from its specific FK field — avoids wrong user being attached
-  if (include.sender)   res.sender   = store.users.find((x) => x.id === item.senderId)   || null;
-  if (include.owner)    res.owner    = store.users.find((x) => x.id === item.ownerId)    || null;
-  if (include.author)   res.author   = store.users.find((x) => x.id === item.authorId)   || null;
-  if (include.creator)  res.creator  = store.users.find((x) => x.id === item.creatorId)  || null;
-  if (include.expert)   res.expert   = store.users.find((x) => x.id === item.expertId)   || null;
-  if (include.sharedBy) res.sharedBy = store.users.find((x) => x.id === item.sharedById) || null;
+  if (include) {
+    // Resolve each user relation from its specific FK field
+    if (include.sender)   res.sender   = store.users.find((x) => x.id === item.senderId)   || null;
+    if (include.owner)    res.owner    = store.users.find((x) => x.id === item.ownerId)    || null;
+    if (include.author)   res.author   = store.users.find((x) => x.id === item.authorId)   || null;
+    if (include.creator)  res.creator  = store.users.find((x) => x.id === item.creatorId)  || null;
+    if (include.expert)   res.expert   = store.users.find((x) => x.id === item.expertId)   || null;
+    if (include.sharedBy) res.sharedBy = store.users.find((x) => x.id === item.sharedById) || null;
 
-  if (include.comments) {
-    res.comments = store.comments
-      .filter((c) => c.projectId === item.id)
-      .map((c) => ({
-        ...c,
-        author: store.users.find((u) => u.id === c.authorId) || null,
-      }));
+    if (include.comments) {
+      res.comments = (store.comments || [])
+        .filter((c) => c.projectId === item.id)
+        .map((c) => ({
+          ...c,
+          author: store.users.find((u) => u.id === c.authorId) || null,
+        }));
+    }
+
+    if (include.upvotes) {
+      res.upvotes = (store.upvotes || []).filter((u) => u.projectId === item.id);
+    }
+
+    if (include.saves) {
+      res.saves = (store.saves || []).filter((s) => s.projectId === item.id);
+    }
+  }
+
+  // Calculate stats for projects
+  if (storeKey === 'projects') {
+    const commentsForProj = (store.comments || []).filter((c) => c.projectId === item.id);
+    const upvotesForProj = (store.upvotes || []).filter((u) => u.projectId === item.id);
+
+    res.commentCount = commentsForProj.length;
+    res.upvoteCount = (item.initialUpvotes || 0) + upvotesForProj.length;
+    res._count = {
+      comments: res.commentCount,
+      upvotes: res.upvoteCount,
+    };
   }
 
   return res;

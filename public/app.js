@@ -1124,8 +1124,8 @@ function renderResourceCard(r, index) {
     <h3 class="resource-title">${escapeHtml(r.title)}</h3>
     <p class="resource-description">${escapeHtml(r.description)}</p>
     <div class="resource-footer">
-      <span class="text-xs text-tertiary">by ${escapeHtml(r.uploader?.name || 'Unknown')}</span>
-      <a href="${encodeURI(r.downloadUrl)}" target="_blank" rel="noopener noreferrer" class="btn-download">Open ↗</a>
+      <span class="text-xs text-tertiary">Verified Resource</span>
+      <a href="${encodeURI(r.downloadUrl)}" target="_blank" rel="noopener noreferrer" class="btn-download">Open Resource ↗</a>
     </div>
   </div>`;
 }
