@@ -181,5 +181,61 @@ router.get('/history', requireAuth, async (req, res) => {
     res.status(500).json({ error: 'Failed to retrieve proposal history.' });
   }
 });
+// GET /api/pitch/autofill — Auto-fill pitch fields based on a project
+router.get('/autofill', requireAuth, async (req, res) => {
+  try {
+    const projectId = parseInt(req.query.projectId, 10);
+    if (!projectId) return res.status(400).json({ error: 'projectId is required' });
+
+    const project = await prisma.project.findUnique({ where: { id: projectId } });
+    if (!project) return res.status(404).json({ error: 'Project not found' });
+
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    if (!apiKey) {
+      // Fallback
+      return res.json({
+        startupName: project.title,
+        targetMarket: 'B2B SaaS / Developer Tools',
+        problemStatement: 'Current solutions are fragmented and inefficient.',
+        solution: project.description,
+        metrics: 'Pre-product, validating with community.',
+        fundingAsk: '$250,000 Pre-seed'
+      });
+    }
+
+    const promptText = `Based on the following startup project idea, deduce the target market, problem statement, and estimate a reasonable funding ask (e.g. "$500k Pre-seed").
+Title: ${project.title}
+Description: ${project.description}
+Tags: ${project.tags}
+
+Output valid JSON ONLY with these keys: "startupName", "targetMarket", "problemStatement", "solution", "metrics", "fundingAsk". Keep the solution and startupName close to the original.`;
+
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: promptText }] }],
+        generationConfig: { responseMimeType: 'application/json' }
+      })
+    });
+
+    if (!response.ok) throw new Error('AI request failed');
+    const data = await response.json();
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const parsed = JSON.parse(rawText || '{}');
+
+    res.json({
+      startupName: parsed.startupName || project.title,
+      targetMarket: parsed.targetMarket || 'Technology / Software',
+      problemStatement: parsed.problemStatement || 'Inefficient processes',
+      solution: parsed.solution || project.description,
+      metrics: parsed.metrics || 'Pre-product',
+      fundingAsk: parsed.fundingAsk || '$250,000 Pre-seed',
+    });
+  } catch (err) {
+    console.error('[FORGE AI PITCH] Autofill error:', err);
+    res.status(500).json({ error: 'Failed to auto-fill pitch details.' });
+  }
+});
 
 module.exports = router;

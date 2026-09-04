@@ -209,20 +209,42 @@
               <div style="margin-top: var(--space-xl);">
                 <h3 class="panel-title">Verified Production Toolkits</h3>
                 <div class="quick-actions" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-                  <a href="https://labs.google/" target="_blank" class="quick-action-btn" style="text-decoration:none;">
-                    <span class="material-symbols-outlined">labs</span> Google Antigravity Labs
+                  <a href="https://nextjs.org/docs" target="_blank" class="quick-action-btn" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">api</span> Next.js Documentation
                   </a>
-                  <a href="https://superscout.co/investor/antigravity-capital" target="_blank" class="quick-action-btn" style="text-decoration:none;">
-                    <span class="material-symbols-outlined">rocket_launch</span> Superscout VC Hub
+                  <a href="https://react.dev/" target="_blank" class="quick-action-btn" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">code</span> React Core Docs
                   </a>
-                  <a href="https://supabase.com/docs/guides/realtime" target="_blank" class="quick-action-btn" style="text-decoration:none;">
-                    <span class="material-symbols-outlined">bolt</span> Supabase Realtime
+                  <a href="https://tailwindcss.com/docs" target="_blank" class="quick-action-btn" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">format_color_fill</span> Tailwind CSS
                   </a>
                   <a href="https://www.prisma.io/docs" target="_blank" class="quick-action-btn" style="text-decoration:none;">
                     <span class="material-symbols-outlined">database</span> Prisma ORM Docs
                   </a>
-                  <a href="https://faq.whatsapp.com/5913398998672934" target="_blank" class="quick-action-btn" style="text-decoration:none;">
-                    <span class="material-symbols-outlined">chat</span> WhatsApp API Specs
+                  <a href="https://aws.amazon.com/" target="_blank" class="quick-action-btn" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">cloud</span> AWS Cloud Infrastructure
+                  </a>
+                  <a href="https://github.com/vercel/next.js/tree/canary/examples" target="_blank" class="quick-action-btn" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">folder_special</span> Verified Templates
+                  </a>
+                </div>
+              </div>
+
+              <!-- Funding Platforms -->
+              <div style="margin-top: var(--space-xl);">
+                <h3 class="panel-title">Actual Funding Platforms</h3>
+                <div class="quick-actions" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                  <a href="https://www.ycombinator.com/apply" target="_blank" class="quick-action-btn" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">rocket_launch</span> Y Combinator
+                  </a>
+                  <a href="https://angel.co/" target="_blank" class="quick-action-btn" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">monetization_on</span> AngelList Venture
+                  </a>
+                  <a href="https://www.seedcamp.com/" target="_blank" class="quick-action-btn" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">nature_people</span> Seedcamp
+                  </a>
+                  <a href="https://www.kickstarter.com/" target="_blank" class="quick-action-btn" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">crowdsource</span> Kickstarter
                   </a>
                 </div>
               </div>
@@ -343,7 +365,12 @@
 
           <div class="pitch-container">
             <form id="pitchForm" class="pitch-form-card">
-              <h3 style="font-size:16px; font-weight:700; margin-bottom:var(--space-xs);">Startup Details</h3>
+              <div class="flex justify-between items-center" style="margin-bottom:var(--space-xs);">
+                <h3 style="font-size:16px; font-weight:700;">Startup Details</h3>
+                <button type="button" id="autoFillPitchBtn" class="btn btn-ghost" style="padding:4px 8px; font-size:12px; border:1px solid var(--border);">
+                  <span class="material-symbols-outlined icon-inline" style="font-size:14px;">magic_button</span> Auto-Fill from Latest Idea
+                </button>
+              </div>
               <input required id="pitchStartupName" placeholder="Startup Name (e.g. Forge AI)" class="form-input" />
               <input required id="pitchTargetMarket" placeholder="Target Market (e.g. Developer Tools & UI/UX)" class="form-input" />
               <textarea required id="pitchProblem" rows="3" placeholder="Problem Statement..." class="form-input"></textarea>

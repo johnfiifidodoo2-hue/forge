@@ -102,8 +102,14 @@ function debounceSearch(fn, delay = 300) {
 // WhatsApp Direct Messaging Link Formatter
 function formatWhatsAppLink(whatsappNumber, recipientName) {
   if (!whatsappNumber) return '#';
-  const cleanNumber = String(whatsappNumber).replace(/[^\d]/g, '');
-  const text = `Hi ${recipientName || 'there'}, I found your profile on Forge Antigravity and would love to discuss a potential collaboration.`;
+  // Strip spaces, dashes, parentheses but keep letters and '+'
+  const cleanNumber = String(whatsappNumber).replace(/[^\w\+]/g, '');
+  
+  let text = `Hi ${recipientName || 'there'}, I found your profile on Forge Antigravity and would love to discuss a potential collaboration.`;
+  if (recipientName && recipientName.includes('Rose-Mary')) {
+    text = `Hello Dr. Rose-Mary Gyening, I am reaching out for mentorship regarding your computer architecture expertise.`;
+  }
+  
   return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
 }
 
@@ -891,6 +897,42 @@ document.getElementById('chatForm')?.addEventListener('submit', async (e) => {
 // ============================================================
 // AI INVESTOR PROPOSAL ENGINE
 // ============================================================
+
+document.getElementById('autoFillPitchBtn')?.addEventListener('click', async () => {
+  const btn = document.getElementById('autoFillPitchBtn');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="material-symbols-outlined icon-inline" style="font-size:14px;">sync</span> Auto-Filling...`;
+
+  try {
+    const { projects } = await api('/ideatank/projects?scope=mine');
+    if (!projects || projects.length === 0) {
+      showToast('No projects found. Pitch an idea in the Idea Tank first!', true);
+      return;
+    }
+    const latest = projects[0];
+    
+    // Start with basic fill to show immediate responsiveness
+    document.getElementById('pitchStartupName').value = latest.title;
+    document.getElementById('pitchSolution').value = latest.description;
+    
+    // Call AI to deduce the rest and estimate funding
+    const res = await api(`/pitch/autofill?projectId=${latest.id}`);
+    
+    document.getElementById('pitchStartupName').value = res.startupName || latest.title;
+    document.getElementById('pitchTargetMarket').value = res.targetMarket || 'B2B SaaS / Developer Tools';
+    document.getElementById('pitchProblem').value = res.problemStatement || 'Deducing from context...';
+    document.getElementById('pitchSolution').value = res.solution || latest.description;
+    document.getElementById('pitchMetrics').value = res.metrics || 'Pre-product, validating with community.';
+    document.getElementById('pitchFundingAsk').value = res.fundingAsk || '$250,000 Pre-seed';
+
+    showToast('Pitch details auto-filled & funding estimated!');
+  } catch (err) {
+    showToast(err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<span class="material-symbols-outlined icon-inline" style="font-size:14px;">magic_button</span> Auto-Fill from Latest Idea`;
+  }
+});
 
 document.getElementById('pitchForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
