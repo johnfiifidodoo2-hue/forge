@@ -15,6 +15,7 @@
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0" />
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -30,8 +31,8 @@
         <p class="auth-hero-tagline">Where developers, designers, and writers build extraordinary products together.</p>
         <ul class="auth-feature-list">
           <li><span class="feature-dot"></span> Pitch ideas, run polls & recruit co-creators</li>
-          <li><span class="feature-dot"></span> Discover & bookmark curated design & code kits</li>
-          <li><span class="feature-dot"></span> Book 1:1 sessions & notes with verified mentors</li>
+          <li><span class="feature-dot"></span> Real-time Chat Room & WhatsApp Direct Connect</li>
+          <li><span class="feature-dot"></span> AI Investor Pitch & Cold Email Engine</li>
         </ul>
       </div>
 
@@ -57,6 +58,7 @@
             <option value="CREATOR">Creator (Developer / Designer / Writer)</option>
             <option value="EXPERT">Expert / Mentor</option>
           </select>
+          <input type="text" id="signupWhatsapp" placeholder="WhatsApp Number (+1234567890)" class="form-input" />
           <button type="submit" class="btn btn-primary w-full">Create Account</button>
         </form>
 
@@ -87,6 +89,14 @@
           <span class="material-symbols-outlined nav-icon">lightbulb</span>
           <span class="nav-label">Idea Tank</span>
         </button>
+        <button data-tab="chat" class="sidebar-link">
+          <span class="material-symbols-outlined nav-icon">forum</span>
+          <span class="nav-label">Chat Room</span>
+        </button>
+        <button data-tab="pitch" class="sidebar-link">
+          <span class="material-symbols-outlined nav-icon">auto_awesome</span>
+          <span class="nav-label">AI Pitch Generator</span>
+        </button>
         <button data-tab="resources" class="sidebar-link">
           <span class="material-symbols-outlined nav-icon">inventory_2</span>
           <span class="nav-label">Resources</span>
@@ -113,6 +123,11 @@
         </div>
 
         <div class="topbar-actions">
+          <!-- Theme Switcher Button -->
+          <button id="themeToggleBtn" class="topbar-icon-btn" title="Toggle Light/Dark Theme">
+            <span id="themeIcon" class="material-symbols-outlined">dark_mode</span>
+          </button>
+
           <!-- Notification Bell -->
           <div class="notif-dropdown-wrapper">
             <button id="notifBtn" class="topbar-icon-btn" title="Notifications">
@@ -148,6 +163,8 @@
       <div class="mobile-tabs">
         <button data-tab="dashboard" class="mobile-tab-btn active">Home</button>
         <button data-tab="ideatank" class="mobile-tab-btn">Ideas</button>
+        <button data-tab="chat" class="mobile-tab-btn">Chat</button>
+        <button data-tab="pitch" class="mobile-tab-btn">AI Pitch</button>
         <button data-tab="resources" class="mobile-tab-btn">Resources</button>
         <button data-tab="bookings" class="mobile-tab-btn">Mentors</button>
       </div>
@@ -172,11 +189,11 @@
                 <button class="quick-action-btn" data-goto="ideatank" data-action="new-idea">
                   <span class="material-symbols-outlined">lightbulb</span> Pitch an idea
                 </button>
-                <button class="quick-action-btn" data-goto="resources" data-action="new-resource">
-                  <span class="material-symbols-outlined">inventory_2</span> Share a resource
+                <button class="quick-action-btn" data-goto="chat">
+                  <span class="material-symbols-outlined">forum</span> Join Chat Room
                 </button>
-                <button class="quick-action-btn" data-goto="bookings">
-                  <span class="material-symbols-outlined">psychology</span> Find a mentor
+                <button class="quick-action-btn" data-goto="pitch">
+                  <span class="material-symbols-outlined">auto_awesome</span> AI Pitch Engine
                 </button>
                 <button class="quick-action-btn" id="openProfileFromDash">
                   <span class="material-symbols-outlined">person</span> Edit profile
@@ -186,6 +203,28 @@
               <div style="margin-top: var(--space-xl);">
                 <h3 class="panel-title">Activity Feed</h3>
                 <div id="activityFeed" class="activity-feed"></div>
+              </div>
+
+              <!-- Verified Toolkit Hub -->
+              <div style="margin-top: var(--space-xl);">
+                <h3 class="panel-title">Verified Production Toolkits</h3>
+                <div class="quick-actions" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                  <a href="https://labs.google/" target="_blank" class="quick-action-btn" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">labs</span> Google Antigravity Labs
+                  </a>
+                  <a href="https://superscout.co/investor/antigravity-capital" target="_blank" class="quick-action-btn" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">rocket_launch</span> Superscout VC Hub
+                  </a>
+                  <a href="https://supabase.com/docs/guides/realtime" target="_blank" class="quick-action-btn" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">bolt</span> Supabase Realtime
+                  </a>
+                  <a href="https://www.prisma.io/docs" target="_blank" class="quick-action-btn" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">database</span> Prisma ORM Docs
+                  </a>
+                  <a href="https://faq.whatsapp.com/5913398998672934" target="_blank" class="quick-action-btn" style="text-decoration:none;">
+                    <span class="material-symbols-outlined">chat</span> WhatsApp API Specs
+                  </a>
+                </div>
               </div>
             </div>
 
@@ -201,8 +240,7 @@
           <div class="section-header">
             <div>
               <h2 class="section-title">Idea Tank</h2>
-              <p class="section-subtitle">Pitch projects, validate concepts, gather feedback, and signal community
-                interest.</p>
+              <p class="section-subtitle">Pitch projects, validate concepts, gather feedback, and signal community interest.</p>
             </div>
             <button id="newIdeaBtn" class="btn btn-primary">+ Pitch Idea</button>
           </div>
@@ -247,13 +285,122 @@
           <div id="ideaFeed" class="idea-feed"></div>
         </section>
 
+        <!-- ===== TAB: REAL-TIME CHAT ROOM ===== -->
+        <section id="tab-chat" class="tab-panel hidden">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Real-Time Chat Room</h2>
+              <p class="section-subtitle">Live cross-disciplinary chat hub connecting Creators and Expert Mentors.</p>
+            </div>
+          </div>
+
+          <div class="chat-container">
+            <div class="chat-sidebar">
+              <h4 style="font-size:14px; font-weight:700; color:var(--text-secondary);">Active Room</h4>
+              <div class="user-chip">
+                <span class="material-symbols-outlined text-accent">forum</span>
+                <div>
+                  <strong style="display:block; font-size:13px;">#global-lounge</strong>
+                  <span style="font-size:11px; color:var(--text-tertiary);">Public Collaboration</span>
+                </div>
+              </div>
+
+              <h4 style="font-size:14px; font-weight:700; color:var(--text-secondary); margin-top:var(--space-md);">Community Members</h4>
+              <div id="chatUserList" class="chat-active-users">
+                <p style="font-size:12px; color:var(--text-tertiary);">Loading active members...</p>
+              </div>
+            </div>
+
+            <div class="chat-main-area">
+              <div class="chat-header-bar">
+                <div class="flex items-center gap-sm">
+                  <span class="material-symbols-outlined text-accent">chat_bubble</span>
+                  <strong style="font-size:15px;">#global-lounge</strong>
+                </div>
+                <span style="font-size:12px; color:var(--text-tertiary);">Real-time Supabase Engine</span>
+              </div>
+
+              <div id="chatMessagesBox" class="chat-messages-box">
+                <p style="text-align:center; color:var(--text-tertiary); margin:auto;">Loading real-time conversation...</p>
+              </div>
+
+              <form id="chatForm" class="chat-input-bar">
+                <input required id="chatInput" type="text" placeholder="Type your message to the room..." />
+                <button type="submit" class="btn btn-primary">Send</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== TAB: AI PITCH GENERATOR ===== -->
+        <section id="tab-pitch" class="tab-panel hidden">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">AI Investor Proposal & Email Engine</h2>
+              <p class="section-subtitle">Transform your project details into production-grade VC pitch decks, cold emails, and Superscout payloads.</p>
+            </div>
+          </div>
+
+          <div class="pitch-container">
+            <form id="pitchForm" class="pitch-form-card">
+              <h3 style="font-size:16px; font-weight:700; margin-bottom:var(--space-xs);">Startup Details</h3>
+              <input required id="pitchStartupName" placeholder="Startup Name (e.g. Forge AI)" class="form-input" />
+              <input required id="pitchTargetMarket" placeholder="Target Market (e.g. Developer Tools & UI/UX)" class="form-input" />
+              <textarea required id="pitchProblem" rows="3" placeholder="Problem Statement..." class="form-input"></textarea>
+              <textarea required id="pitchSolution" rows="3" placeholder="Solution & Core Value Prop..." class="form-input"></textarea>
+              <input id="pitchMetrics" placeholder="Metrics / Traction (Optional)" class="form-input" />
+              <input required id="pitchFundingAsk" placeholder="Funding Ask (e.g. $500,000 Seed)" class="form-input" />
+
+              <button type="submit" id="generatePitchBtn" class="btn btn-primary w-full" style="margin-top:var(--space-xs);">
+                <span class="material-symbols-outlined">auto_awesome</span> Generate Proposal & Email
+              </button>
+            </form>
+
+            <div class="pitch-results-area">
+              <div class="pitch-output-card">
+                <div class="pitch-card-header">
+                  <div class="pitch-card-title">
+                    <span class="material-symbols-outlined text-accent">slideshow</span> Investor Deck Structure
+                  </div>
+                  <button id="copyDeckBtn" class="copy-btn"><span class="material-symbols-outlined icon-inline">content_copy</span> Copy Markdown</button>
+                </div>
+                <pre id="deckOutput" class="pitch-pre-box">Fill in the startup details on the left and click "Generate Proposal & Email" to build your VC Investor Deck.</pre>
+              </div>
+
+              <div class="pitch-output-card">
+                <div class="pitch-card-header">
+                  <div class="pitch-card-title">
+                    <span class="material-symbols-outlined text-accent">mail</span> VC Cold Outreach Email
+                  </div>
+                  <button id="copyEmailBtn" class="copy-btn"><span class="material-symbols-outlined icon-inline">content_copy</span> Copy Email</button>
+                </div>
+                <pre id="emailOutput" class="pitch-pre-box">Your generated cold email ready for VC partner outreach will appear here.</pre>
+              </div>
+
+              <div class="pitch-output-card">
+                <div class="pitch-card-header">
+                  <div class="pitch-card-title">
+                    <span class="material-symbols-outlined text-accent">database</span> Superscout VC Database Payload
+                  </div>
+                  <div class="flex gap-sm">
+                    <button id="copySuperscoutBtn" class="copy-btn"><span class="material-symbols-outlined icon-inline">content_copy</span> Copy JSON</button>
+                    <a href="https://superscout.co/investor/antigravity-capital" target="_blank" class="export-btn" style="text-decoration:none;">
+                      <span class="material-symbols-outlined icon-inline">open_in_new</span> Open Superscout
+                    </a>
+                  </div>
+                </div>
+                <pre id="superscoutOutput" class="pitch-pre-box">Formated payload for direct VC submission will appear here.</pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- ===== TAB: RESOURCES ===== -->
         <section id="tab-resources" class="tab-panel hidden">
           <div class="section-header">
             <div>
               <h2 class="section-title">Resource Exchange</h2>
-              <p class="section-subtitle">UI kits, code snippets, templates, guides, and tools shared by creators &
-                mentors.</p>
+              <p class="section-subtitle">UI kits, code snippets, templates, guides, and tools shared by creators & mentors.</p>
             </div>
             <button id="newResourceBtn" class="btn btn-primary">+ Share Resource</button>
           </div>
@@ -268,8 +415,7 @@
 
               <div class="pill-group">
                 <button id="resFilterAllBtn" class="pill-btn active" data-res-filter="all">All Resources</button>
-                <button id="resFilterSavedBtn" class="pill-btn" data-res-filter="saved">Saved (<span
-                    id="savedResCount">0</span>)</button>
+                <button id="resFilterSavedBtn" class="pill-btn" data-res-filter="saved">Saved (<span id="savedResCount">0</span>)</button>
               </div>
             </div>
           </div>
@@ -385,6 +531,9 @@
 
         <label class="form-label">Portfolio / Website Link</label>
         <input id="profilePortfolioUrl" placeholder="https://yourwebsite.dev" class="form-input" />
+
+        <label class="form-label">WhatsApp Number (International format)</label>
+        <input id="profileWhatsapp" placeholder="+1234567890" class="form-input" />
 
         <div class="flex gap-sm" style="margin-top: 12px;">
           <button type="submit" class="btn btn-primary flex-1">Save Profile</button>

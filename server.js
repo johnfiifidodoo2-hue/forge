@@ -12,6 +12,8 @@ const bookingRoutes = require('./routes/bookings');
 const dashboardRoutes = require('./routes/dashboard');
 const notificationRoutes = require('./routes/notifications');
 const userRoutes = require('./routes/users');
+const chatRoutes = require('./routes/chat');
+const aiPitchRoutes = require('./routes/aiPitch');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -22,7 +24,7 @@ app.use(cors());
 app.use(express.json());
 app.set('trust proxy', 1);
 
-// Rate limit auth endpoints (generous limit for testing/evaluation)
+// Rate limit auth endpoints (generous limit for evaluation)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 500,
@@ -43,6 +45,15 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/pitch', aiPitchRoutes);
+
+// Direct profile alias route for PUT /api/profile
+const { requireAuth } = require('./middleware/auth');
+app.put('/api/profile', requireAuth, (req, res, next) => {
+  req.url = '/profile';
+  authRoutes(req, res, next);
+});
 
 // Health check — also tests DB connectivity
 app.get('/api/health', async (req, res) => {
@@ -60,7 +71,6 @@ app.get('/api/health', async (req, res) => {
     });
   }
 });
-
 
 // 404 for unmatched API routes
 app.use('/api', (req, res) => {
@@ -86,4 +96,3 @@ if (require.main === module) {
 }
 
 module.exports = app;
-

@@ -2,9 +2,13 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider = "postgresql"
+}
+
+enum Theme {
+  LIGHT
+  DARK
 }
 
 model User {
@@ -16,6 +20,8 @@ model User {
   bio             String          @default("")
   skills          String          @default("") // Comma-separated expertise tags
   portfolioUrl    String          @default("")
+  whatsappNumber  String          @default("")
+  preferredTheme  Theme           @default(LIGHT)
   projects        Project[]
   comments        Comment[]
   resources       Resource[]
@@ -26,6 +32,8 @@ model User {
   following       Follow[]        @relation("Following")
   followers       Follow[]        @relation("Followers")
   savedProjects   ProjectSave[]
+  chatMessages    ChatMessage[]
+  pitchProposals  PitchProposal[]
   createdAt       DateTime        @default(now())
 }
 
@@ -88,29 +96,29 @@ model Comment {
 }
 
 model Resource {
-  id          Int              @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   title       String
   description String
   url         String
-  category    String           // "TEMPLATE", "GUIDE", or "TOOL"
+  category    String   // "TEMPLATE", "GUIDE", or "TOOL"
   sharedById  Int
-  sharedBy    User             @relation(fields: [sharedById], references: [id])
-  createdAt   DateTime         @default(now())
+  sharedBy    User     @relation(fields: [sharedById], references: [id])
+  createdAt   DateTime @default(now())
 }
 
 model Booking {
-  id          Int           @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   title       String
   scheduledAt DateTime
-  status      String        @default("PENDING") // "PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"
-  notes       String        @default("")
-  rating      Int?          // 1-5 stars, given by the creator after completion
-  review      String?       // Written feedback left after the session
+  status      String   @default("PENDING") // "PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"
+  notes       String   @default("")
+  rating      Int?     // 1-5 stars, given by the creator after completion
+  review      String?  // Written feedback left after the session
   creatorId   Int
-  creator     User          @relation("CreatorBookings", fields: [creatorId], references: [id])
+  creator     User     @relation("CreatorBookings", fields: [creatorId], references: [id])
   expertId    Int
-  expert      User          @relation("ExpertBookings", fields: [expertId], references: [id])
-  createdAt   DateTime      @default(now())
+  expert      User     @relation("ExpertBookings", fields: [expertId], references: [id])
+  createdAt   DateTime @default(now())
 }
 
 model Notification {
@@ -122,4 +130,28 @@ model Notification {
   referenceId Int      @default(0) // ID of the related entity
   read        Boolean  @default(false)
   createdAt   DateTime @default(now())
+}
+
+model ChatMessage {
+  id        Int      @id @default(autoincrement())
+  senderId  Int
+  sender    User     @relation(fields: [senderId], references: [id])
+  roomId    String   @default("global")
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model PitchProposal {
+  id               Int      @id @default(autoincrement())
+  creatorId        Int
+  creator          User     @relation(fields: [creatorId], references: [id])
+  startupName      String
+  targetMarket     String
+  problemStatement String
+  solution         String
+  metrics          String
+  fundingAsk       String
+  generatedPitch   String
+  generatedEmail   String
+  createdAt        DateTime @default(now())
 }

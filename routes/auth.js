@@ -21,6 +21,8 @@ function sanitizeUser(user) {
       .map((s) => s.trim())
       .filter(Boolean);
   }
+  safe.whatsappNumber = safe.whatsappNumber || '';
+  safe.preferredTheme = safe.preferredTheme || 'LIGHT';
   return safe;
 }
 
@@ -29,7 +31,6 @@ function sanitizeUser(user) {
 function normalizeEmail(raw) {
   if (typeof raw !== 'string') return null;
   const email = raw.trim().toLowerCase();
-  // Loose but safe: "something@something.something"
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null;
   return email;
 }
@@ -37,7 +38,7 @@ function normalizeEmail(raw) {
 // POST /api/auth/signup
 router.post('/signup', async (req, res) => {
   try {
-    const { password, name, role } = req.body;
+    const { password, name, role, whatsappNumber, preferredTheme } = req.body;
     const email = normalizeEmail(req.body.email);
 
     if (!email) {
@@ -67,6 +68,8 @@ router.post('/signup', async (req, res) => {
         password: hashedPassword,
         name,
         role: role || 'CREATOR',
+        whatsappNumber: whatsappNumber ? String(whatsappNumber).trim() : '',
+        preferredTheme: ['LIGHT', 'DARK'].includes(preferredTheme) ? preferredTheme : 'LIGHT',
       },
     });
 
@@ -74,12 +77,6 @@ router.post('/signup', async (req, res) => {
     res.status(201).json({ user: sanitizeUser(user), token });
   } catch (err) {
     console.error('[FORGE] Signup error:', err.message, err.stack);
-    if (err.message && err.message.includes('DATABASE_URL')) {
-      return res.status(500).json({ error: 'Database not configured. Check Vercel environment variables.' });
-    }
-    if (err.code === 'P1001' || err.code === 'P1002' || err.code === 'P1003') {
-      return res.status(500).json({ error: 'Cannot reach the database. Check DATABASE_URL in Vercel settings.' });
-    }
     res.status(500).json({ error: 'Something went wrong during signup. Please try again.' });
   }
 });
@@ -96,7 +93,7 @@ router.post('/login', async (req, res) => {
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return res.status(404).json({ error: 'No account found with this email address. Please click "Sign Up" to register.' });
+      return res.status(404).json({ error: 'No account found with this email address.' });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
@@ -108,12 +105,6 @@ router.post('/login', async (req, res) => {
     res.json({ user: sanitizeUser(user), token });
   } catch (err) {
     console.error('[FORGE] Login error:', err.message, err.stack);
-    if (err.message && err.message.includes('DATABASE_URL')) {
-      return res.status(500).json({ error: 'Database not configured. Check Vercel environment variables.' });
-    }
-    if (err.code === 'P1001' || err.code === 'P1002' || err.code === 'P1003') {
-      return res.status(500).json({ error: 'Cannot reach the database. Check DATABASE_URL in Vercel settings.' });
-    }
     res.status(500).json({ error: 'Something went wrong during login. Please try again.' });
   }
 });
@@ -121,19 +112,29 @@ router.post('/login', async (req, res) => {
 // GET /api/auth/me - return current user based on token
 const { requireAuth } = require('../middleware/auth');
 router.get('/me', requireAuth, async (req, res) => {
-  const user = await prisma.user.findUnique({ where: { id: req.user.id } });
-  if (!user) return res.status(404).json({ error: 'User not found.' });
-  res.json({ user: sanitizeUser(user) });
+  try {
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    res.json({ user: sanitizeUser(user) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch user profile.' });
+  }
 });
 
-// PATCH /api/auth/profile - update bio, skills, and portfolioUrl
-router.patch('/profile', requireAuth, async (req, res) => {
+// Helper for updating user profile data
+async function updateProfileHandler(req, res) {
   try {
-    const { bio, skills, portfolioUrl } = req.body;
+    const { bio, skills, portfolioUrl, whatsappNumber, preferredTheme } = req.body;
     const data = {};
 
     if (bio !== undefined) data.bio = String(bio).slice(0, 500);
     if (portfolioUrl !== undefined) data.portfolioUrl = String(portfolioUrl).slice(0, 255);
+    if (whatsappNumber !== undefined) data.whatsappNumber = String(whatsappNumber).trim().slice(0, 30);
+    if (preferredTheme !== undefined && ['LIGHT', 'DARK'].includes(preferredTheme)) {
+      data.preferredTheme = preferredTheme;
+    }
+
     if (skills !== undefined) {
       const parsed = Array.isArray(skills)
         ? skills
@@ -151,9 +152,13 @@ router.patch('/profile', requireAuth, async (req, res) => {
 
     res.json({ user: sanitizeUser(user) });
   } catch (err) {
-    console.error(err);
+    console.error('[FORGE] Update profile error:', err.message);
     res.status(500).json({ error: 'Failed to update profile.' });
   }
-});
+}
+
+// PATCH /api/auth/profile & PUT /api/profile
+router.patch('/profile', requireAuth, updateProfileHandler);
+router.put('/profile', requireAuth, updateProfileHandler);
 
 module.exports = router;

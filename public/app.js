@@ -1,13 +1,13 @@
 // ============================================================
-// Forge — Client-side Application Logic
+// Forge — Client-side Application Logic & Real-time Ecosystem
 // ============================================================
 
 const API_BASE = '/api';
-const DEMO_PASSWORD = 'Password123!';
 
 const state = {
   token: localStorage.getItem('forge_token') || null,
   user: JSON.parse(localStorage.getItem('forge_user') || 'null'),
+  theme: localStorage.getItem('forge_theme') || 'LIGHT',
   activeTab: 'dashboard',
   activeCategory: '',
   ideaScope: 'all',        // all | mine
@@ -20,6 +20,7 @@ const state = {
   notifications: [],
   unreadNotifs: 0,
   notifTimer: null,
+  chatTimer: null,
 };
 
 // ---------- Helpers ----------
@@ -98,60 +99,100 @@ function debounceSearch(fn, delay = 300) {
   state.searchDebounce = setTimeout(fn, delay);
 }
 
-async function api(path, options = {}) {
-  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-  if (state.token) headers.Authorization = `Bearer ${state.token}`;
+// WhatsApp Direct Messaging Link Formatter
+function formatWhatsAppLink(whatsappNumber, recipientName) {
+  if (!whatsappNumber) return '#';
+  const cleanNumber = String(whatsappNumber).replace(/[^\d]/g, '');
+  const text = `Hi ${recipientName || 'there'}, I found your profile on Forge Antigravity and would love to discuss a potential collaboration.`;
+  return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
+}
 
-  const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
+// ---------- API Wrapper ----------
+
+async function api(endpoint, options = {}) {
+  const headers = { 'Content-Type': 'application/json', ...options.headers };
+  if (state.token) {
+    headers['Authorization'] = `Bearer ${state.token}`;
+  }
+
+  const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
   const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    if (res.status === 401 && state.token) {
-      clearSession();
-      renderAuthState();
-    }
-    throw new Error(data.error || 'Something went wrong.');
+    throw new Error(data.error || 'An unexpected server error occurred.');
   }
   return data;
 }
 
-// ---------- Skeleton Loaders ----------
-
-function skeletonCards(count, type = 'idea') {
+function skeletonCards(count = 3, type = 'idea') {
   const cards = [];
   for (let i = 0; i < count; i++) {
     if (type === 'idea') {
       cards.push(`
-        <div class="glass-card skeleton-card card-animated" style="${staggerDelay(i)}">
-          <div class="flex justify-between gap-md">
-            <div style="flex:1;">
-              <div class="skeleton skeleton-line" style="width:65%;"></div>
-              <div class="skeleton skeleton-line" style="width:100%;margin-top:8px;"></div>
-              <div class="skeleton skeleton-line" style="width:40%;margin-top:4px;"></div>
+        <div class="glass-card skeleton-card">
+          <div class="flex gap-md items-center" style="margin-bottom:12px;">
+            <div class="skeleton skeleton-avatar"></div>
+            <div class="flex-1">
+              <div class="skeleton skeleton-text" style="width:40%;"></div>
+              <div class="skeleton skeleton-text" style="width:20%;"></div>
             </div>
-            <div class="skeleton" style="width:36px;height:36px;border-radius:999px;"></div>
           </div>
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton skeleton-text" style="width:90%;"></div>
+          <div class="skeleton skeleton-text" style="width:60%;"></div>
         </div>
       `);
-    } else if (type === 'resource') {
+    } else {
       cards.push(`
-        <div class="glass-card skeleton-card card-animated" style="${staggerDelay(i)}">
-          <div class="skeleton skeleton-line" style="width:80px;height:22px;border-radius:999px;"></div>
-          <div class="skeleton skeleton-line" style="width:75%;margin-top:16px;"></div>
-          <div class="skeleton skeleton-line" style="width:100%;margin-top:8px;"></div>
-        </div>
-      `);
-    } else if (type === 'expert') {
-      cards.push(`
-        <div class="glass-card skeleton-card card-animated flex-col items-center" style="${staggerDelay(i)}; display:flex;">
-          <div class="skeleton" style="width:56px;height:56px;border-radius:999px;"></div>
-          <div class="skeleton skeleton-line" style="width:100px;margin-top:16px;"></div>
+        <div class="glass-card skeleton-card">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton skeleton-text" style="width:80%;"></div>
+          <div class="skeleton skeleton-text" style="width:50%;"></div>
         </div>
       `);
     }
   }
   return cards.join('');
 }
+
+// ---------- Theme Engine ----------
+
+function applyTheme(theme) {
+  state.theme = theme === 'DARK' ? 'DARK' : 'LIGHT';
+  localStorage.setItem('forge_theme', state.theme);
+
+  const root = document.documentElement;
+  const themeIcon = document.getElementById('themeIcon');
+
+  if (state.theme === 'DARK') {
+    root.classList.add('dark');
+    if (themeIcon) themeIcon.textContent = 'light_mode';
+  } else {
+    root.classList.remove('dark');
+    if (themeIcon) themeIcon.textContent = 'dark_mode';
+  }
+}
+
+async function toggleTheme() {
+  const newTheme = state.theme === 'DARK' ? 'LIGHT' : 'DARK';
+  applyTheme(newTheme);
+
+  if (state.user && state.token) {
+    try {
+      const { user } = await api('/profile', {
+        method: 'PUT',
+        body: JSON.stringify({ preferredTheme: newTheme }),
+      });
+      state.user = user;
+      localStorage.setItem('forge_user', JSON.stringify(user));
+    } catch {
+      // Keep local state if sync fails
+    }
+  }
+  showToast(`Switched to ${newTheme === 'DARK' ? 'Dark' : 'Light'} Mode`);
+}
+
+document.getElementById('themeToggleBtn')?.addEventListener('click', toggleTheme);
 
 // ---------- Session & Auth ----------
 
@@ -160,6 +201,9 @@ function saveSession(user, token) {
   state.token = token;
   localStorage.setItem('forge_token', token);
   localStorage.setItem('forge_user', JSON.stringify(user));
+  if (user.preferredTheme) {
+    applyTheme(user.preferredTheme);
+  }
 }
 
 function clearSession() {
@@ -168,6 +212,7 @@ function clearSession() {
   localStorage.removeItem('forge_token');
   localStorage.removeItem('forge_user');
   if (state.notifTimer) clearInterval(state.notifTimer);
+  if (state.chatTimer) clearInterval(state.chatTimer);
 }
 
 async function validateSession() {
@@ -259,9 +304,10 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     const email = document.getElementById('signupEmail').value.trim().toLowerCase();
     const password = document.getElementById('signupPassword').value;
     const role = document.getElementById('signupRole').value;
+    const whatsappNumber = document.getElementById('signupWhatsapp')?.value?.trim() || '';
     const data = await api('/auth/signup', {
       method: 'POST',
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({ name, email, password, role, whatsappNumber }),
     });
     saveSession(data.user, data.token);
     renderAuthState();
@@ -365,10 +411,14 @@ function openProfileModal() {
     ? state.user.skills.join(', ')
     : state.user.skills || '';
   const portfolioUrl = state.user.portfolioUrl || '';
+  const whatsappNumber = state.user.whatsappNumber || '';
 
   document.getElementById('profileBio').value = bio;
   document.getElementById('profileSkills').value = skills;
   document.getElementById('profilePortfolioUrl').value = portfolioUrl;
+  if (document.getElementById('profileWhatsapp')) {
+    document.getElementById('profileWhatsapp').value = whatsappNumber;
+  }
   document.getElementById('profileModal').classList.remove('hidden');
 }
 
@@ -387,14 +437,16 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
     const bio = document.getElementById('profileBio').value;
     const skills = document.getElementById('profileSkills').value;
     const portfolioUrl = document.getElementById('profilePortfolioUrl').value;
+    const whatsappNumber = document.getElementById('profileWhatsapp')?.value || '';
 
-    const { user } = await api('/auth/profile', {
-      method: 'PATCH',
-      body: JSON.stringify({ bio, skills, portfolioUrl }),
+    const { user } = await api('/profile', {
+      method: 'PUT',
+      body: JSON.stringify({ bio, skills, portfolioUrl, whatsappNumber }),
     });
     saveSession(user, state.token);
     document.getElementById('profileModal').classList.add('hidden');
     showToast('Profile updated successfully!');
+    if (state.activeTab === 'bookings') loadExperts();
   } catch (err) {
     showToast(err.message, true);
   }
@@ -415,11 +467,14 @@ function switchTab(tab) {
   state.activeTab = tab;
   document.querySelectorAll('.tab-panel').forEach((panel) => panel.classList.add('hidden'));
   const activePanel = document.getElementById(`tab-${state.activeTab}`);
-  activePanel.classList.remove('hidden');
+  if (activePanel) {
+    activePanel.classList.remove('hidden');
+    activePanel.style.animation = 'none';
+    activePanel.offsetHeight;
+    activePanel.style.animation = '';
+  }
 
-  activePanel.style.animation = 'none';
-  activePanel.offsetHeight;
-  activePanel.style.animation = '';
+  if (state.chatTimer) clearInterval(state.chatTimer);
 
   setActiveTabStyles();
   loadActiveTab();
@@ -446,42 +501,35 @@ function loadActiveTab() {
   if (state.activeTab === 'dashboard') {
     loadDashboard();
     loadActivityFeed();
-  }
-  if (state.activeTab === 'ideatank') loadProjects();
-  if (state.activeTab === 'resources') loadResources();
-  if (state.activeTab === 'bookings') {
+  } else if (state.activeTab === 'ideatank') {
+    loadProjects();
+  } else if (state.activeTab === 'resources') {
+    loadResources();
+  } else if (state.activeTab === 'bookings') {
     loadExperts();
     loadMyBookings();
+  } else if (state.activeTab === 'chat') {
+    loadChatMessages();
+    state.chatTimer = setInterval(loadChatMessages, 3000);
   }
 }
 
-// Global search input in top bar
-document.getElementById('globalSearch').addEventListener('input', (e) => {
-  const query = e.target.value.trim();
-  if (!query) return;
-  debounceSearch(() => {
-    if (state.activeTab === 'ideatank') {
-      document.getElementById('ideaSearch').value = query;
-      loadProjects();
-    } else if (state.activeTab === 'resources') {
-      document.getElementById('resourceSearch').value = query;
-      loadResources();
-    } else if (state.activeTab === 'bookings') {
-      document.getElementById('expertSearch').value = query;
-      loadExperts();
-    }
-  });
+// Global search handling
+document.getElementById('globalSearch').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const val = e.target.value.trim();
+    if (!val) return;
+    switchTab('ideatank');
+    document.getElementById('ideaSearch').value = val;
+    loadProjects();
+  }
 });
 
-// Keyboard Shortcuts (Ctrl+K and Esc)
+// Shortcut Ctrl+K
 document.addEventListener('keydown', (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
     e.preventDefault();
     document.getElementById('globalSearch').focus();
-  }
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-overlay').forEach((m) => m.classList.add('hidden'));
-    document.getElementById('notifMenu').classList.add('hidden');
   }
 });
 
@@ -491,74 +539,52 @@ document.addEventListener('keydown', (e) => {
 
 async function loadDashboard() {
   const statsGrid = document.getElementById('statsGrid');
-  const recentList = document.getElementById('recentIdeasList');
-  statsGrid.innerHTML = skeletonCards(4, 'resource');
-  recentList.innerHTML = '<p class="text-tertiary text-sm">Loading...</p>';
-
   try {
-    const { stats, recentProjects } = await api('/dashboard/stats');
-
-    const statItems = [
-      { label: 'Your Projects', value: stats.myProjects, accent: true },
-      { label: 'Resources Shared', value: stats.myResources },
-      { label: 'Sessions Scheduled', value: stats.myBookings },
-      { label: 'Pending Requests', value: stats.pendingBookings },
-      { label: 'Community Ideas', value: stats.communityIdeas },
-      { label: 'Shared Resources', value: stats.communityResources },
-      { label: 'Available Mentors', value: stats.availableExperts },
-      { label: 'Your Comments', value: stats.myComments },
-    ];
-
-    statsGrid.innerHTML = statItems
-      .slice(0, 4)
-      .map(
-        (s) => `
-      <div class="stat-card ${s.accent ? 'accent' : ''} card-animated">
-        <div class="stat-value" data-target="${s.value}">0</div>
-        <div class="stat-label">${s.label}</div>
-      </div>`
-      )
-      .join('');
-
-    // Count-up animation
-    statsGrid.querySelectorAll('.stat-value').forEach((el) => {
-      const target = parseInt(el.dataset.target, 10);
-      let count = 0;
-      const step = Math.max(1, Math.ceil(target / 15));
-      const timer = setInterval(() => {
-        count += step;
-        if (count >= target) {
-          el.textContent = target;
-          clearInterval(timer);
-        } else {
-          el.textContent = count;
-        }
-      }, 30);
-    });
-
-    if (!recentProjects.length) {
-      recentList.innerHTML = '<p class="text-tertiary text-sm">No ideas yet — be the first to pitch!</p>';
-      return;
-    }
-
-    recentList.innerHTML = recentProjects
-      .map(
-        (p) => `
-      <div class="recent-item" data-goto-ideas>
+    const data = await api('/dashboard/stats');
+    statsGrid.innerHTML = `
+      <div class="glass-card stat-card">
+        <div class="stat-icon"><span class="material-symbols-outlined">lightbulb</span></div>
         <div>
-          <div class="recent-item-title">${escapeHtml(p.title)}</div>
-          <div class="recent-item-meta">by ${escapeHtml(p.author?.name || 'Unknown')}</div>
+          <p class="stat-val">${data.totalProjects || 0}</p>
+          <p class="stat-lbl">Active Ideas</p>
         </div>
-        <div class="recent-item-stats">
-          <span class="material-symbols-outlined icon-inline">thumb_up</span> ${p.upvoteCount} · <span class="material-symbols-outlined icon-inline">chat_bubble</span> ${p.commentCount}
+      </div>
+      <div class="glass-card stat-card">
+        <div class="stat-icon"><span class="material-symbols-outlined">inventory_2</span></div>
+        <div>
+          <p class="stat-val">${data.totalResources || 0}</p>
+          <p class="stat-lbl">Resources Shared</p>
         </div>
-      </div>`
-      )
-      .join('');
+      </div>
+      <div class="glass-card stat-card">
+        <div class="stat-icon"><span class="material-symbols-outlined">psychology</span></div>
+        <div>
+          <p class="stat-val">${data.totalExperts || 0}</p>
+          <p class="stat-lbl">Verified Mentors</p>
+        </div>
+      </div>
+      <div class="glass-card stat-card">
+        <div class="stat-icon"><span class="material-symbols-outlined">group</span></div>
+        <div>
+          <p class="stat-val">${data.totalUsers || 0}</p>
+          <p class="stat-lbl">Community Members</p>
+        </div>
+      </div>`;
 
-    recentList.querySelectorAll('[data-goto-ideas]').forEach((el) => {
-      el.addEventListener('click', () => switchTab('ideatank'));
-    });
+    const recentList = document.getElementById('recentIdeasList');
+    if (data.recentProjects && data.recentProjects.length) {
+      recentList.innerHTML = data.recentProjects
+        .map(
+          (p) => `
+        <div class="recent-item" onclick="switchTab('ideatank')">
+          <p class="recent-title">${escapeHtml(p.title)}</p>
+          <p class="recent-meta">by ${escapeHtml(p.owner?.name || 'Creator')} · ${p.upvoteCount || 0} upvotes</p>
+        </div>`
+        )
+        .join('');
+    } else {
+      recentList.innerHTML = '<p class="text-xs text-tertiary">No recent ideas.</p>';
+    }
   } catch (err) {
     statsGrid.innerHTML = `<p class="error-text">${err.message}</p>`;
   }
@@ -566,27 +592,26 @@ async function loadDashboard() {
 
 async function loadActivityFeed() {
   const feed = document.getElementById('activityFeed');
-  if (!feed) return;
-  feed.innerHTML = '<p class="text-tertiary text-sm">Loading activity...</p>';
   try {
     const { activities } = await api('/dashboard/activity');
     if (!activities || !activities.length) {
-      feed.innerHTML = '<p class="text-tertiary text-sm">No recent platform activity.</p>';
+      feed.innerHTML = '<p class="text-xs text-tertiary">No recent activity.</p>';
       return;
     }
-
     feed.innerHTML = activities
       .map(
-        (act) => `
+        (a) => `
       <div class="activity-item">
-        <span class="activity-icon">${act.icon}</span>
-        <span class="activity-text">${escapeHtml(act.text)}</span>
-        <span class="activity-time">${timeAgo(act.time)}</span>
+        <div class="avatar avatar-sm" style="background:${nameGradient(a.userName)}">${initials(a.userName)}</div>
+        <div>
+          <p class="activity-text"><strong>${escapeHtml(a.userName)}</strong> ${escapeHtml(a.action)}</p>
+          <p class="activity-time">${timeAgo(a.timestamp)}</p>
+        </div>
       </div>`
       )
       .join('');
   } catch {
-    feed.innerHTML = '<p class="text-tertiary text-sm">Could not load activity feed.</p>';
+    feed.innerHTML = '<p class="text-xs text-tertiary">Could not load activity feed.</p>';
   }
 }
 
@@ -605,7 +630,11 @@ document.getElementById('ideaSearch').addEventListener('input', () => {
   debounceSearch(loadProjects);
 });
 
-// Idea scope buttons (All vs My Ideas)
+document.getElementById('ideaSortSelect').addEventListener('change', (e) => {
+  state.ideaSort = e.target.value;
+  loadProjects();
+});
+
 document.getElementById('scopeAllIdeasBtn').addEventListener('click', () => {
   state.ideaScope = 'all';
   document.getElementById('scopeAllIdeasBtn').classList.add('active');
@@ -620,22 +649,19 @@ document.getElementById('scopeMyIdeasBtn').addEventListener('click', () => {
   loadProjects();
 });
 
-// Idea sort select
-document.getElementById('ideaSortSelect').addEventListener('change', (e) => {
-  state.ideaSort = e.target.value;
-  loadProjects();
-});
-
 document.getElementById('ideaForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   try {
     const title = document.getElementById('ideaTitle').value;
     const description = document.getElementById('ideaDescription').value;
     const tags = document.getElementById('ideaTags').value;
-    await api('/ideatank/projects', { method: 'POST', body: JSON.stringify({ title, description, tags }) });
+    await api('/ideatank/projects', {
+      method: 'POST',
+      body: JSON.stringify({ title, description, tags }),
+    });
     document.getElementById('ideaForm').reset();
     document.getElementById('ideaForm').classList.add('hidden');
-    showToast('Idea published!');
+    showToast('Idea published to Idea Tank!');
     loadProjects();
   } catch (err) {
     showToast(err.message, true);
@@ -646,12 +672,11 @@ async function loadProjects() {
   const feed = document.getElementById('ideaFeed');
   feed.innerHTML = skeletonCards(3, 'idea');
   try {
-    const search = document.getElementById('ideaSearch')?.value?.trim() || '';
     const params = new URLSearchParams();
-
-    if (search) params.set('search', search);
+    if (state.ideaScope === 'mine') params.set('scope', 'mine');
     if (state.ideaSort) params.set('sort', state.ideaSort);
-    if (state.ideaScope === 'mine') params.set('mine', 'true');
+    const search = document.getElementById('ideaSearch')?.value?.trim();
+    if (search) params.set('search', search);
 
     const query = params.toString() ? `?${params}` : '';
     const { projects } = await api(`/ideatank/projects${query}`);
@@ -660,95 +685,97 @@ async function loadProjects() {
       feed.innerHTML = `
         <div class="empty-state">
           <div class="empty-state-icon"><span class="material-symbols-outlined empty-icon">lightbulb</span></div>
-          <p>${search ? 'No ideas match your search.' : 'No ideas in this view yet. Be the first to pitch one!'}</p>
+          <p>${search ? 'No ideas match your search.' : 'No ideas published yet. Be the first to pitch!'}</p>
         </div>`;
       return;
     }
 
-    feed.innerHTML = projects.map((p, i) => renderProjectCard(p, i)).join('');
-    wireProjectEvents(projects);
+    feed.innerHTML = projects.map((p, i) => renderIdeaCard(p, i)).join('');
+
+    projects.forEach((p) => {
+      const upvoteBtn = document.getElementById(`upvote-${p.id}`);
+      if (upvoteBtn) {
+        upvoteBtn.addEventListener('click', () => handleUpvote(p.id));
+      }
+      const commentToggle = document.getElementById(`toggle-comments-${p.id}`);
+      if (commentToggle) {
+        commentToggle.addEventListener('click', () => {
+          document.getElementById(`comments-${p.id}`).classList.toggle('hidden');
+        });
+      }
+      const commentForm = document.getElementById(`comment-form-${p.id}`);
+      if (commentForm) {
+        commentForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const input = document.getElementById(`comment-input-${p.id}`);
+          handlePostComment(p.id, input.value);
+        });
+      }
+    });
   } catch (err) {
     feed.innerHTML = `<p class="error-text">${err.message}</p>`;
   }
 }
 
-function wireProjectEvents(projects) {
-  projects.forEach((p) => {
-    const toggleBtn = document.getElementById(`toggle-comments-${p.id}`);
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => {
-        document.getElementById(`comments-${p.id}`).classList.toggle('hidden');
-      });
-    }
-
-    const upvoteBtn = document.getElementById(`upvote-${p.id}`);
-    if (upvoteBtn) {
-      upvoteBtn.addEventListener('click', async () => {
-        try {
-          const { upvoteCount, hasUpvoted } = await api(`/ideatank/projects/${p.id}/upvote`, {
-            method: 'POST',
-          });
-          upvoteBtn.classList.toggle('active', hasUpvoted);
-          upvoteBtn.innerHTML = `<span class="material-symbols-outlined icon-inline">thumb_up</span> ${upvoteCount}`;
-          showToast(hasUpvoted ? 'Interest recorded!' : 'Upvote removed');
-        } catch (err) {
-          showToast(err.message, true);
-        }
-      });
-    }
-
-    const form = document.getElementById(`comment-form-${p.id}`);
-    if (form) {
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const input = document.getElementById(`comment-input-${p.id}`);
-        const content = input.value.trim();
-        if (!content) return;
-        try {
-          await api(`/ideatank/projects/${p.id}/comments`, {
-            method: 'POST',
-            body: JSON.stringify({ content }),
-          });
-          input.value = '';
-          loadProjects();
-        } catch (err) {
-          showToast(err.message, true);
-        }
-      });
-    }
-  });
+async function handleUpvote(projectId) {
+  try {
+    await api(`/ideatank/projects/${projectId}/upvote`, { method: 'POST' });
+    loadProjects();
+  } catch (err) {
+    showToast(err.message, true);
+  }
 }
 
-function renderProjectCard(p, index) {
+async function handlePostComment(projectId, content) {
+  if (!content || !content.trim()) return;
+  try {
+    await api(`/ideatank/projects/${projectId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ content }),
+    });
+    loadProjects();
+  } catch (err) {
+    showToast(err.message, true);
+  }
+}
+
+function renderIdeaCard(p, index) {
   const tags = (p.tags || [])
-    .map((t) => `<span class="tag-pill">#${escapeHtml(t)}</span>`)
+    .map((t) => `<span class="tag-chip">#${escapeHtml(t)}</span>`)
     .join('');
 
   const comments = (p.comments || [])
     .map(
       (c) => `
-      <div class="comment-item">
-        <div class="avatar avatar-sm shrink-0" style="background:${nameGradient(c.author?.name)}">${initials(c.author?.name)}</div>
-        <div>
-          <span class="comment-author">${escapeHtml(c.author?.name || 'Unknown')}</span>
-          <span class="comment-text">${escapeHtml(c.content)}</span>
-        </div>
-      </div>`
+    <div class="comment-item">
+      <div class="avatar avatar-xs" style="background:${nameGradient(c.author?.name)}">${initials(c.author?.name)}</div>
+      <div class="comment-content">
+        <p class="comment-author">${escapeHtml(c.author?.name || 'Anonymous')} <span class="comment-time">${timeAgo(c.createdAt)}</span></p>
+        <p class="comment-text">${escapeHtml(c.content)}</p>
+      </div>
+    </div>`
     )
     .join('');
 
+  const waButton = p.owner?.whatsappNumber
+    ? `<a href="${formatWhatsAppLink(p.owner.whatsappNumber, p.owner.name)}" target="_blank" rel="noopener noreferrer" class="btn-whatsapp"><span class="material-symbols-outlined icon-inline">chat</span> Direct WhatsApp</a>`
+    : '';
+
   return `
   <div class="glass-card idea-card card-animated" style="${staggerDelay(index)}">
-    <div class="idea-card-header">
-      <div class="idea-card-body">
-        <h3 class="idea-title">${escapeHtml(p.title)}</h3>
-        <p class="idea-description">${escapeHtml(p.description)}</p>
+    <div class="idea-header flex justify-between items-center">
+      <div class="flex items-center gap-sm">
+        <div class="avatar avatar-md" style="background:${nameGradient(p.owner?.name)}">${initials(p.owner?.name)}</div>
+        <div>
+          <h4 class="idea-author">${escapeHtml(p.owner?.name || 'Creator')}</h4>
+          <p class="idea-role">${p.owner?.role === 'EXPERT' ? 'Expert Mentor' : 'Creator'}</p>
+        </div>
       </div>
-      <div class="idea-author text-right">
-        <div class="avatar" style="background:${nameGradient(p.author?.name)}">${initials(p.author?.name)}</div>
-        <p class="text-xs text-tertiary" style="margin-top:4px;">${escapeHtml(p.author?.name || '')}</p>
-      </div>
+      ${waButton}
     </div>
+
+    <h3 class="idea-title">${escapeHtml(p.title)}</h3>
+    <p class="idea-description">${escapeHtml(p.description)}</p>
 
     ${tags ? `<div class="tags-row">${tags}</div>` : ''}
 
@@ -771,6 +798,147 @@ function renderProjectCard(p, index) {
     </div>
   </div>`;
 }
+
+// ============================================================
+// REAL-TIME CHAT ROOM
+// ============================================================
+
+async function loadChatMessages() {
+  const box = document.getElementById('chatMessagesBox');
+  const userList = document.getElementById('chatUserList');
+
+  try {
+    const { messages } = await api('/chat/messages?roomId=global');
+
+    if (!messages.length) {
+      box.innerHTML = '<p style="text-align:center; color:var(--text-tertiary); margin:auto;">No messages yet. Be the first to start the conversation!</p>';
+    } else {
+      const isScrolledToBottom = box.scrollHeight - box.clientHeight <= box.scrollTop + 50;
+
+      box.innerHTML = messages
+        .map((m) => {
+          const isOwn = state.user && m.sender.id === state.user.id;
+          const roleClass = m.sender.role === 'EXPERT' ? 'expert' : 'creator';
+          const roleLabel = m.sender.role === 'EXPERT' ? 'Mentor' : 'Creator';
+          return `
+          <div class="chat-message-item ${isOwn ? 'own' : ''}">
+            <div class="avatar avatar-sm" style="background:${nameGradient(m.sender.name)}">${initials(m.sender.name)}</div>
+            <div>
+              <div class="chat-sender-info">
+                <strong>${escapeHtml(m.sender.name)}</strong>
+                <span class="badge-role ${roleClass}">${roleLabel}</span>
+              </div>
+              <div class="chat-bubble">
+                ${escapeHtml(m.content)}
+                <div class="chat-timestamp">${formatDate(m.createdAt)}</div>
+              </div>
+            </div>
+          </div>`;
+        })
+        .join('');
+
+      if (isScrolledToBottom) {
+        box.scrollTop = box.scrollHeight;
+      }
+    }
+
+    // Extract unique active members in chat room
+    const membersMap = new Map();
+    messages.forEach((m) => membersMap.set(m.sender.id, m.sender));
+    if (state.user) membersMap.set(state.user.id, state.user);
+
+    userList.innerHTML = Array.from(membersMap.values())
+      .map((u) => {
+        const roleLabel = u.role === 'EXPERT' ? 'Mentor' : 'Creator';
+        const waBtn = u.whatsappNumber ? `<a href="${formatWhatsAppLink(u.whatsappNumber, u.name)}" target="_blank" class="btn-whatsapp" style="padding:4px 8px; font-size:11px;" title="Chat on WhatsApp"><span class="material-symbols-outlined" style="font-size:14px;">chat</span></a>` : '';
+        return `
+        <div class="user-chip">
+          <div class="avatar avatar-xs" style="background:${nameGradient(u.name)}">${initials(u.name)}</div>
+          <div style="flex:1; overflow:hidden;">
+            <strong style="display:block; font-size:12px; white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${escapeHtml(u.name)}</strong>
+            <span class="badge-role ${u.role.toLowerCase()}">${roleLabel}</span>
+          </div>
+          ${waBtn}
+        </div>`;
+      })
+      .join('');
+  } catch (err) {
+    box.innerHTML = `<p class="error-text">${err.message}</p>`;
+  }
+}
+
+document.getElementById('chatForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const input = document.getElementById('chatInput');
+  const content = input.value.trim();
+  if (!content) return;
+
+  try {
+    await api('/chat/messages', {
+      method: 'POST',
+      body: JSON.stringify({ content, roomId: 'global' }),
+    });
+    input.value = '';
+    loadChatMessages();
+  } catch (err) {
+    showToast(err.message, true);
+  }
+});
+
+// ============================================================
+// AI INVESTOR PROPOSAL ENGINE
+// ============================================================
+
+document.getElementById('pitchForm')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = document.getElementById('generatePitchBtn');
+  btn.disabled = true;
+  btn.innerHTML = `<span class="material-symbols-outlined">sync</span> Synthesizing AI Proposal...`;
+
+  try {
+    const startupName = document.getElementById('pitchStartupName').value;
+    const targetMarket = document.getElementById('pitchTargetMarket').value;
+    const problemStatement = document.getElementById('pitchProblem').value;
+    const solution = document.getElementById('pitchSolution').value;
+    const metrics = document.getElementById('pitchMetrics').value;
+    const fundingAsk = document.getElementById('pitchFundingAsk').value;
+
+    const data = await api('/pitch/generate', {
+      method: 'POST',
+      body: JSON.stringify({ startupName, targetMarket, problemStatement, solution, metrics, fundingAsk }),
+    });
+
+    document.getElementById('deckOutput').textContent = data.pitchDeck || 'No deck output generated.';
+    document.getElementById('emailOutput').textContent = data.coldEmail || 'No email output generated.';
+    document.getElementById('superscoutOutput').textContent = data.superscoutPayload || 'No payload generated.';
+
+    showToast('AI Pitch Deck & Email generated successfully!');
+  } catch (err) {
+    showToast(err.message, true);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<span class="material-symbols-outlined">auto_awesome</span> Generate Proposal & Email`;
+  }
+});
+
+// Copy to Clipboard Handlers
+document.getElementById('copyDeckBtn')?.addEventListener('click', () => {
+  const text = document.getElementById('deckOutput').textContent;
+  navigator.clipboard.writeText(text);
+  showToast('Investor Deck copied to clipboard!');
+});
+
+document.getElementById('copyEmailBtn')?.addEventListener('click', () => {
+  const text = document.getElementById('emailOutput').textContent;
+  navigator.clipboard.writeText(text);
+  showToast('Cold Outreach Email copied to clipboard!');
+});
+
+document.getElementById('copySuperscoutBtn')?.addEventListener('click', () => {
+  const text = document.getElementById('superscoutOutput').textContent;
+  navigator.clipboard.writeText(text);
+  showToast('Superscout Payload copied to clipboard!');
+});
 
 // ============================================================
 // RESOURCE EXCHANGE
@@ -848,7 +1016,6 @@ async function loadResources() {
   const grid = document.getElementById('resourceGrid');
   grid.innerHTML = skeletonCards(3, 'resource');
 
-  // Update saved count badge
   document.getElementById('savedResCount').textContent = state.savedResources.length;
 
   try {
@@ -962,6 +1129,10 @@ function renderExpertCard(expert, index) {
     .map((s) => `<span class="skill-pill">${escapeHtml(s)}</span>`)
     .join('');
 
+  const waBtn = expert.whatsappNumber
+    ? `<a href="${formatWhatsAppLink(expert.whatsappNumber, expert.name)}" target="_blank" rel="noopener noreferrer" class="btn-whatsapp" style="margin-top:var(--space-sm); justify-content:center;"><span class="material-symbols-outlined icon-inline">chat</span> Direct WhatsApp</a>`
+    : '';
+
   return `
   <div class="glass-card expert-card card-animated" style="${staggerDelay(index)}">
     <div class="avatar avatar-lg" style="background:${nameGradient(expert.name)}">${initials(expert.name)}</div>
@@ -969,6 +1140,7 @@ function renderExpertCard(expert, index) {
     <p class="expert-role">Verified Mentor</p>
     ${expert.bio ? `<p class="expert-bio">${escapeHtml(expert.bio)}</p>` : ''}
     ${skills ? `<div class="expert-skills">${skills}</div>` : ''}
+    ${waBtn}
     <button id="book-btn-${expert.id}" class="btn btn-primary w-full" style="margin-top:var(--space-md);">Book 1:1 Session</button>
   </div>`;
 }
@@ -1132,6 +1304,7 @@ function renderBookingRow(b, index) {
 // ---------- Boot ----------
 
 (async function boot() {
+  applyTheme(state.theme);
   if (state.token) {
     await validateSession();
   }

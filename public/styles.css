@@ -6,25 +6,25 @@
 
 /* ---------- CSS Custom Properties ---------- */
 :root {
-  /* Background layers */
-  --bg-base: #090a10;
-  --bg-surface: #10121d;
-  --bg-elevated: #161929;
-  --bg-card: rgba(22, 26, 43, 0.7);
-  --bg-card-solid: #151828;
-  --bg-input: rgba(255, 255, 255, 0.04);
-  --bg-hover: rgba(255, 255, 255, 0.07);
+  /* Default Light Mode Palette - Clean Slate Light (#F8FAFC) & High-Contrast Text (#0F172A) */
+  --bg-base: #F8FAFC;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #F1F5F9;
+  --bg-card: #FFFFFF;
+  --bg-card-solid: #FFFFFF;
+  --bg-input: #F1F5F9;
+  --bg-hover: #E2E8F0;
 
   /* Glass */
-  --glass-bg: rgba(20, 24, 40, 0.65);
-  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(15, 23, 42, 0.08);
   --glass-blur: 20px;
 
   /* Text */
-  --text-primary: #f3f4f8;
-  --text-secondary: #9da4bc;
-  --text-tertiary: #606782;
-  --text-inverse: #090a10;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-tertiary: #64748B;
+  --text-inverse: #FFFFFF;
 
   /* Accent — Orange / Amber Gradient */
   --accent: #f97316;
@@ -53,9 +53,10 @@
   --danger-subtle: rgba(239, 68, 68, 0.15);
 
   /* Borders */
-  --border: rgba(255, 255, 255, 0.08);
-  --border-light: rgba(255, 255, 255, 0.14);
+  --border: #E2E8F0;
+  --border-light: #CBD5E1;
   --border-accent: rgba(249, 115, 22, 0.35);
+
 
   /* Radii */
   --radius-sm: 8px;
@@ -1627,3 +1628,307 @@ textarea.form-input {
 .quick-action-btn .material-symbols-outlined {
   font-size: 18px;
 }
+
+/* ============================================================
+   DARK MODE OVERRIDES & OBSIDIAN SLATE PALETTE (#090D16)
+   ============================================================ */
+:root.dark,
+html.dark {
+  --bg-base: #090D16;
+  --bg-surface: #0F172A;
+  --bg-elevated: #1E293B;
+  --bg-card: #0F172A;
+  --bg-card-solid: #0F172A;
+  --bg-input: #1E293B;
+  --bg-hover: #334155;
+
+  --glass-bg: rgba(15, 23, 42, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.1);
+
+  --text-primary: #F8FAFC;
+  --text-secondary: #94A3B8;
+  --text-tertiary: #64748B;
+  --text-inverse: #090D16;
+
+  --border: #1E293B;
+  --border-light: #334155;
+  --border-accent: rgba(249, 115, 22, 0.35);
+
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Theme Smooth Transitions (150ms) */
+body, div, nav, header, main, section, article, sidebar, input, select, textarea, button, .card, .modal {
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+/* ============================================================
+   WHATSAPP DIRECT CONNECT BUTTON
+   ============================================================ */
+.btn-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #25D366;
+  color: #FFFFFF !important;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  font-size: 13px;
+  transition: transform 150ms ease, background 150ms ease, box-shadow 150ms ease;
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+}
+
+.btn-whatsapp:hover {
+  background: #1DA851;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+}
+
+/* ============================================================
+   REAL-TIME CHAT ROOM UI
+   ============================================================ */
+.chat-container {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--space-lg);
+  height: calc(100vh - 160px);
+  min-height: 550px;
+}
+
+@media (max-width: 900px) {
+  .chat-container {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+}
+
+.chat-sidebar {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.chat-active-users {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px var(--space-sm);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
+.chat-main-area {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-header-bar {
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-elevated);
+}
+
+.chat-messages-box {
+  flex: 1;
+  padding: var(--space-lg);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.chat-message-item {
+  display: flex;
+  gap: 12px;
+  max-width: 80%;
+}
+
+.chat-message-item.own {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.chat-bubble {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  border-radius: 14px;
+  color: var(--text-primary);
+  line-height: 1.5;
+}
+
+.chat-message-item.own .chat-bubble {
+  background: var(--accent);
+  color: #FFFFFF;
+  border-color: var(--accent-hover);
+}
+
+.chat-sender-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.chat-timestamp {
+  font-size: 10px;
+  opacity: 0.75;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.chat-input-bar {
+  padding: var(--space-md);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: var(--space-md);
+  background: var(--bg-surface);
+}
+
+.chat-input-bar input {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.badge-role {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.badge-role.creator {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.badge-role.expert {
+  background: var(--secondary-subtle);
+  color: var(--secondary);
+  border: 1px solid var(--secondary);
+}
+
+/* ============================================================
+   AI PITCH GENERATOR ENGINE UI
+   ============================================================ */
+.pitch-container {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .pitch-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pitch-form-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.pitch-results-area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.pitch-output-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+.pitch-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border);
+}
+
+.pitch-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.pitch-pre-box {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 380px;
+  overflow-y: auto;
+  color: var(--text-primary);
+}
+
+.copy-btn, .export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 150ms ease;
+}
+
+.copy-btn:hover, .export-btn:hover {
+  background: var(--accent-subtle);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
