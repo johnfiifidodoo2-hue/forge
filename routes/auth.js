@@ -20,18 +20,19 @@ function sanitizeUser(user) {
       .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
+  } else if (!Array.isArray(safe.skills)) {
+    safe.skills = [];
   }
   safe.whatsappNumber = safe.whatsappNumber || '';
   safe.preferredTheme = safe.preferredTheme || 'LIGHT';
   return safe;
 }
 
-// Accepts any valid email address (local-part, @, domain) including
-// plus-tags, unicode, and unusual TLDs. Returns null when invalid.
+// Accepts any standard email address string after trimming and lowercasing
 function normalizeEmail(raw) {
   if (typeof raw !== 'string') return null;
   const email = raw.trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null;
+  if (!email || !email.includes('@') || email.length < 5) return null;
   return email;
 }
 
@@ -44,20 +45,18 @@ router.post('/signup', async (req, res) => {
     if (!email) {
       return res.status(400).json({ error: 'Please enter a valid email address.' });
     }
-    if (!password || !name) {
-      return res.status(400).json({ error: 'email, password, and name are required.' });
+    if (!name || typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({ error: 'Please provide your full name.' });
     }
-    if (typeof password !== 'string' || password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long.' });
     }
 
-    if (role && !['CREATOR', 'EXPERT'].includes(role)) {
-      return res.status(400).json({ error: 'role must be CREATOR or EXPERT.' });
-    }
+    const selectedRole = role && ['CREATOR', 'EXPERT'].includes(role) ? role : 'CREATOR';
 
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
-      return res.status(409).json({ error: 'An account with that email already exists.' });
+      return res.status(409).json({ error: 'An account with that email already exists. Please log in.' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -66,8 +65,8 @@ router.post('/signup', async (req, res) => {
       data: {
         email,
         password: hashedPassword,
-        name,
-        role: role || 'CREATOR',
+        name: name.trim(),
+        role: selectedRole,
         whatsappNumber: whatsappNumber ? String(whatsappNumber).trim() : '',
         preferredTheme: ['LIGHT', 'DARK'].includes(preferredTheme) ? preferredTheme : 'LIGHT',
       },
@@ -77,9 +76,28 @@ router.post('/signup', async (req, res) => {
     res.status(201).json({ user: sanitizeUser(user), token });
   } catch (err) {
     console.error('[FORGE] Signup error:', err.message, err.stack);
-    res.status(500).json({ error: 'Something went wrong during signup. Please try again.' });
+    res.status(500).json({ error: err.message || 'Something went wrong during signup. Please try again.' });
   }
 });
+
+// Demo accounts helper to auto-provision if missing
+async function provisionDemoUserIfMissing(email, role = 'CREATOR') {
+  const hashedPassword = await bcrypt.hash('Password123!', 10);
+  const name = role === 'EXPERT' ? 'Alex Rivera (Demo Expert)' : 'Kai Chen (Demo Creator)';
+  const bio = role === 'EXPERT' ? 'Senior Full-Stack Architect & Product Strategist' : 'Indie Developer & UI Specialist';
+  const skills = role === 'EXPERT' ? 'System Design, React, Node.js, Cloud' : 'Figma, Tailwind, React, Express';
+
+  return await prisma.user.create({
+    data: {
+      email,
+      password: hashedPassword,
+      name,
+      role,
+      bio,
+      skills,
+    },
+  });
+}
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
@@ -88,12 +106,20 @@ router.post('/login', async (req, res) => {
     const email = normalizeEmail(req.body.email);
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Please enter a valid email and password.' });
+      return res.status(400).json({ error: 'Please enter both email and password.' });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    // Auto-provision demo account if missing
+    if (!user && (email === 'creator@forge.dev' || email === 'kai@forge.dev' || email === 'demo@forge.dev')) {
+      user = await provisionDemoUserIfMissing(email, 'CREATOR');
+    } else if (!user && (email === 'expert@forge.dev' || email === 'mentor@forge.dev' || email === 'maya@forge.dev')) {
+      user = await provisionDemoUserIfMissing(email, 'EXPERT');
+    }
+
     if (!user) {
-      return res.status(404).json({ error: 'No account found with this email address.' });
+      return res.status(404).json({ error: 'No account found with this email address. Please click "Sign Up" to create an account.' });
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
@@ -105,7 +131,7 @@ router.post('/login', async (req, res) => {
     res.json({ user: sanitizeUser(user), token });
   } catch (err) {
     console.error('[FORGE] Login error:', err.message, err.stack);
-    res.status(500).json({ error: 'Something went wrong during login. Please try again.' });
+    res.status(500).json({ error: err.message || 'Something went wrong during login. Please try again.' });
   }
 });
 
@@ -117,7 +143,7 @@ router.get('/me', requireAuth, async (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found.' });
     res.json({ user: sanitizeUser(user) });
   } catch (err) {
-    console.error(err);
+    console.error('[FORGE] Auth me error:', err.message);
     res.status(500).json({ error: 'Failed to fetch user profile.' });
   }
 });
