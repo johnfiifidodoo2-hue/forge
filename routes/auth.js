@@ -38,10 +38,11 @@ function normalizeEmail(raw) {
 function handleDbError(err, res, actionName) {
   console.error(`[FORGE AUTH] ${actionName} error:`, err.message || err);
   const msg = String(err.message || '');
-  if (msg.includes('ENOTFOUND') || msg.includes('DATABASE_URL') || err.code === 'P1001' || err.code === 'P1002' || err.code === 'P1003') {
-    return res.status(500).json({
-      error: 'Unable to connect to database. Please check your DATABASE_URL environment setting on Vercel.',
-    });
+  // Connection errors are handled transparently in db.js (falls back to memory store)
+  // Only surface them if somehow they escape the proxy layer
+  if (msg.includes('ENOTFOUND') || msg.includes('ECONNREFUSED') || msg.includes('ETIMEDOUT') ||
+      err.code === 'P1001' || err.code === 'P1002' || err.code === 'P1003') {
+    console.error('[FORGE AUTH] A DB connection error escaped the resilience proxy. Check db.js.');
   }
   return res.status(500).json({
     error: 'An unexpected server error occurred. Please try again.',
