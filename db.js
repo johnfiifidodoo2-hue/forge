@@ -792,6 +792,7 @@ function createModelProxy(modelName, storeKey) {
       if (where) {
         if (where.role) list = list.filter((x) => x.role === where.role);
         if (where.roomId) list = list.filter((x) => x.roomId === where.roomId);
+        if (where.category) list = list.filter((x) => x.category === where.category);
         if (where.creatorId) list = list.filter((x) => x.creatorId === Number(where.creatorId));
         if (where.userId) list = list.filter((x) => x.userId === Number(where.userId));
         if (where.ownerId) list = list.filter((x) => x.ownerId === Number(where.ownerId));
@@ -880,13 +881,23 @@ function attachRelations(item, storeKey, include) {
   const res = { ...item };
 
   if (include) {
+    const selectFields = (record, config) => {
+      if (!record) return null;
+      if (!config || !config.select) return { ...record };
+      return Object.fromEntries(
+        Object.entries(config.select)
+          .filter(([, enabled]) => enabled)
+          .map(([key]) => [key, record[key]])
+      );
+    };
+
     // Resolve each user relation from its specific FK field
-    if (include.sender)   res.sender   = store.users.find((x) => x.id === item.senderId)   || null;
-    if (include.owner)    res.owner    = store.users.find((x) => x.id === item.ownerId)    || null;
-    if (include.author)   res.author   = store.users.find((x) => x.id === item.authorId)   || null;
-    if (include.creator)  res.creator  = store.users.find((x) => x.id === item.creatorId)  || null;
-    if (include.expert)   res.expert   = store.users.find((x) => x.id === item.expertId)   || null;
-    if (include.sharedBy) res.sharedBy = store.users.find((x) => x.id === item.sharedById) || null;
+    if (include.sender)   res.sender   = selectFields(store.users.find((x) => x.id === item.senderId), include.sender);
+    if (include.owner)    res.owner    = selectFields(store.users.find((x) => x.id === item.ownerId), include.owner);
+    if (include.author)   res.author   = selectFields(store.users.find((x) => x.id === item.authorId), include.author);
+    if (include.creator)  res.creator  = selectFields(store.users.find((x) => x.id === item.creatorId), include.creator);
+    if (include.expert)   res.expert   = selectFields(store.users.find((x) => x.id === item.expertId), include.expert);
+    if (include.sharedBy) res.sharedBy = selectFields(store.users.find((x) => x.id === item.sharedById), include.sharedBy);
 
     if (include.comments) {
       res.comments = (store.comments || [])
