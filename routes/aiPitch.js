@@ -5,7 +5,7 @@ const { requireAuth } = require('../middleware/auth');
 const router = express.Router();
 
 // Fallback high-quality structured generator if Gemini API key is unavailable or fails
-function generateStructuredPitchFallback({ startupName, targetMarket, problemStatement, solution, metrics, fundingAsk, creatorName }) {
+function generateStructuredPitchFallback({ startupName, targetMarket, problemStatement, solution, metrics, fundingAsk, creatorName, appUrl }) {
   const sourceText = `${targetMarket} ${problemStatement} ${solution} ${metrics}`.toLowerCase();
   const isComputeArchitecture = /risc-v|fpga|npu|processor|coprocessor|hardware|silicon|cuda|gpu|cache|memory|dma|edge ai|edge-ai|inference/.test(sourceText);
   const architectureSection = isComputeArchitecture
@@ -67,7 +67,7 @@ Best regards,
 
 ${creatorName || 'Founder'}
 Founder & CEO, ${startupName}
-Pitch Profile: https://forge-antigravity.vercel.app
+Pitch Profile: ${appUrl}
 `;
 
   const superscoutPayload = {
@@ -174,7 +174,8 @@ Output format must be valid JSON with keys: "pitchDeck" (markdown string), "cold
         solution,
         metrics,
         fundingAsk,
-        creatorName: req.user.name,
+      creatorName: req.user.name,
+      appUrl: process.env.PUBLIC_APP_URL || `${req.protocol}://${req.get('host')}`,
       });
       pitchDeck = fallback.pitchDeck;
       coldEmail = fallback.coldEmail;
