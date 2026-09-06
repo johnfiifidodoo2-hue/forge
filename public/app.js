@@ -1029,25 +1029,24 @@ document.getElementById('openInviteModalBtn')?.addEventListener('click', async (
   document.getElementById('inviteModal').classList.remove('hidden');
 
   try {
-    const { experts } = await api('/bookings/experts');
-    const creators = [
-      { id: 101, name: 'Kai Chen', role: 'CREATOR', bio: 'Full-stack developer & UI enthusiast' },
-      { id: 102, name: 'Marcus Thorne', role: 'CREATOR', bio: 'Hardware systems engineer & Verilog developer' },
-      { id: 103, name: 'Elena Vance', role: 'CREATOR', bio: 'Cryptography & Rust developer' },
-    ];
-    const allMembers = [...experts, ...creators];
+    const { creators } = await api('/chat/invitees');
+    if (!creators.length) {
+      list.innerHTML = `<p style="font-size:12px; color:var(--text-tertiary);">No other creators are available to invite right now.</p>`;
+      return;
+    }
 
-    list.innerHTML = allMembers
+    list.innerHTML = creators
       .map((m) => `
       <div class="glass-card flex items-center justify-between" style="padding:10px 14px; margin-bottom:6px;">
         <div class="flex items-center gap-sm">
           <div class="avatar avatar-xs" style="background:${nameGradient(m.name)}">${initials(m.name)}</div>
           <div>
             <strong style="font-size:13px; display:block;">${escapeHtml(m.name)}</strong>
-            <span class="badge-role ${m.role.toLowerCase()}">${m.role === 'EXPERT' ? 'Mentor' : 'Creator'}</span>
+            <span class="badge-role creator">Creator</span>
+            <span style="display:block; max-width:260px; font-size:11px; color:var(--text-tertiary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(m.skills || m.bio || 'Forge creator')}</span>
           </div>
         </div>
-        <button class="btn btn-primary invite-action-btn" data-user-name="${escapeHtml(m.name)}" style="padding:4px 10px; font-size:11px;">
+        <button class="btn btn-primary invite-action-btn" data-user-id="${m.id}" data-user-name="${escapeHtml(m.name)}" style="padding:4px 10px; font-size:11px;">
           + Invite
         </button>
       </div>`)
@@ -1056,19 +1055,24 @@ document.getElementById('openInviteModalBtn')?.addEventListener('click', async (
     list.querySelectorAll('.invite-action-btn').forEach((btn) => {
       btn.addEventListener('click', async () => {
         const userName = btn.dataset.userName;
+        const creatorId = Number(btn.dataset.userId);
+        btn.disabled = true;
+        btn.textContent = 'Inviting...';
         try {
-          await api('/chat/messages', {
+          await api('/chat/invitations', {
             method: 'POST',
             body: JSON.stringify({
-              content: `👋 Invited ${userName} to join #${channel}! Excited to collaborate here.`,
+              creatorId,
               roomId: channel,
             }),
           });
-          document.getElementById('inviteModal').classList.add('hidden');
           showToast(`Invited ${userName} to #${channel}!`);
+          btn.textContent = 'Invited ✓';
           loadChatMessages();
         } catch (err) {
           showToast(err.message, true);
+          btn.disabled = false;
+          btn.textContent = '+ Invite';
         }
       });
     });
