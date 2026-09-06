@@ -188,6 +188,15 @@ const store = {
       initialUpvotes: 87,
       createdAt: new Date('2024-06-01T14:40:00Z'),
     },
+    {
+      id: 9,
+      title: 'EdgeTensor: RISC-V NPU for Private On-Device AI',
+      description: 'A test-ready deep-tech startup concept: a RISC-V RV64GC edge SoC with a 128-MAC INT8 neural-processing coprocessor, 512 KB scratchpad SRAM, DMA-fed double buffering, and a coherent L2 cache. The MVP targets sub-8 W industrial vision gateways, running quantized defect-detection models below 20 ms while keeping sensitive video on-device. Current FPGA prototype achieves 31 FPS on 1080p input and 3.6 TOPS/W estimated efficiency. Seeking design partners in manufacturing and logistics.',
+      tags: 'computer-architecture, risc-v, npu, edge-ai, fpga, memory-hierarchy, dma, startup',
+      ownerId: 1,
+      initialUpvotes: 64,
+      createdAt: new Date('2026-09-01T10:00:00Z'),
+    },
   ],
   comments: [
     {
@@ -232,12 +241,21 @@ const store = {
       authorId: 6, // Dr. James Ofosu
       createdAt: new Date('2024-05-06T11:00:00Z'),
     },
+    {
+      id: 7,
+      content: 'For EdgeTensor, lead the pitch with the memory story: double-buffered DMA keeps the MAC array busy while the next tile arrives. Investors will understand that as lower latency, lower power, and a defensible hardware/software co-design moat.',
+      projectId: 9,
+      authorId: 2,
+      createdAt: new Date('2026-09-02T09:30:00Z'),
+    },
   ],
   upvotes: [
     { id: 1, userId: 1, projectId: 1 },
     { id: 2, userId: 2, projectId: 1 },
     { id: 3, userId: 3, projectId: 2 },
     { id: 4, userId: 4, projectId: 3 },
+    { id: 5, userId: 2, projectId: 9 },
+    { id: 6, userId: 6, projectId: 9 },
   ],
   saves: [
     { id: 1, userId: 1, projectId: 1 },
@@ -550,6 +568,53 @@ const store = {
       category: 'TOOL',
       sharedById: 4,
       createdAt: new Date('2024-04-18T15:00:00Z'),
+    },
+
+    // ── COPY-READY CODE SNIPPETS (REAL, MAINTAINED EXAMPLES) ──
+    {
+      id: 34,
+      title: 'Express Production Security Best-Practices Snippets',
+      description: 'Practical Express patterns for TLS, Helmet, secure cookies, input validation, and dependency hygiene. Useful when hardening Forge-style Node APIs.',
+      url: 'https://expressjs.com/en/advanced/best-practice-security.html',
+      category: 'CODE_SNIPPET',
+      sharedById: 4,
+      createdAt: new Date('2024-05-01T09:00:00Z'),
+    },
+    {
+      id: 35,
+      title: 'RISC-V Assembly Programming Examples',
+      description: 'Runnable RISC-V assembly examples covering arithmetic, branches, stack frames, function calls, and memory access—ideal for testing ISA and pipeline concepts.',
+      url: 'https://github.com/TheThirdOne/rars/tree/master/examples',
+      category: 'CODE_SNIPPET',
+      sharedById: 2,
+      createdAt: new Date('2024-05-03T11:30:00Z'),
+    },
+    {
+      id: 36,
+      title: 'OpenAI API JavaScript Examples',
+      description: 'Official JavaScript examples for structured responses, streaming, tools, and error handling. A solid reference for testing an AI-assisted product workflow.',
+      url: 'https://github.com/openai/openai-node/tree/master/examples',
+      category: 'CODE_SNIPPET',
+      sharedById: 6,
+      createdAt: new Date('2024-05-06T14:15:00Z'),
+    },
+    {
+      id: 37,
+      title: 'CUDA Matrix Multiplication Sample',
+      description: 'Official CUDA sample demonstrating tiled matrix multiplication, shared-memory locality, and the performance trade-offs behind GPU compute kernels.',
+      url: 'https://github.com/NVIDIA/cuda-samples/tree/master/Samples/6_Performance/MatrixMul',
+      category: 'CODE_SNIPPET',
+      sharedById: 6,
+      createdAt: new Date('2024-05-09T10:45:00Z'),
+    },
+    {
+      id: 38,
+      title: 'SystemVerilog RTL Style Guide & Examples',
+      description: 'Synthesizable RTL conventions and code examples for clear state machines, reset behaviour, and safe combinational/sequential logic.',
+      url: 'https://github.com/lowRISC/style-guides/blob/master/VerilogCodingStyle.md',
+      category: 'CODE_SNIPPET',
+      sharedById: 2,
+      createdAt: new Date('2024-05-12T16:00:00Z'),
     },
   ],
 

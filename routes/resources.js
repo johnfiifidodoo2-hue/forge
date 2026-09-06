@@ -4,7 +4,16 @@ const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
-const VALID_CATEGORIES = ['UI_KIT', 'CODE_SNIPPET', 'TEMPLATE', 'GUIDE', 'TOOL'];
+const VALID_CATEGORIES = ['UI_KIT', 'CODE_SNIPPET', 'TEMPLATE', 'GUIDE', 'TOOL', 'GITHUB_REPO', 'HARDWARE'];
+
+function normalizeHttpUrl(value) {
+  try {
+    const url = new URL(String(value).trim());
+    return ['http:', 'https:'].includes(url.protocol) ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
 
 // GET /api/resources - all resources, optionally filtered by ?category= and ?search=
 router.get('/', async (req, res) => {
@@ -55,8 +64,9 @@ router.get('/', async (req, res) => {
 router.post('/', requireAuth, async (req, res) => {
   try {
     const { title, description, category, downloadUrl } = req.body;
+    const safeUrl = normalizeHttpUrl(downloadUrl);
 
-    if (!title || !description || !category || !downloadUrl) {
+    if (!title || !description || !category || !safeUrl) {
       return res.status(400).json({ error: 'title, description, category, and downloadUrl are required.' });
     }
 
@@ -69,7 +79,7 @@ router.post('/', requireAuth, async (req, res) => {
         title,
         description,
         category,
-        url: downloadUrl,
+        url: safeUrl,
         sharedById: req.user.id,
       },
       include: {
@@ -114,7 +124,11 @@ router.patch('/:id', requireAuth, async (req, res) => {
     if (title !== undefined) data.title = String(title).trim();
     if (description !== undefined) data.description = String(description).trim();
     if (category !== undefined) data.category = category;
-    if (downloadUrl !== undefined) data.url = String(downloadUrl).trim();
+    if (downloadUrl !== undefined) {
+      const safeUrl = normalizeHttpUrl(downloadUrl);
+      if (!safeUrl) return res.status(400).json({ error: 'downloadUrl must be a valid http or https URL.' });
+      data.url = safeUrl;
+    }
     if (!(data.title ?? resource.title) || !(data.description ?? resource.description) || !(data.url ?? resource.url)) {
       return res.status(400).json({ error: 'title, description, and downloadUrl cannot be empty.' });
     }

@@ -1091,7 +1091,7 @@ document.getElementById('autoFillPitchBtn')?.addEventListener('click', async () 
   btn.innerHTML = `<span class="material-symbols-outlined icon-inline" style="font-size:14px;">sync</span> Auto-Filling...`;
 
   try {
-    const { projects } = await api('/ideatank/projects?scope=mine');
+    const { projects } = await api('/ideatank/projects?mine=true');
     if (!projects || projects.length === 0) {
       showToast('No projects found. Pitch an idea in the Idea Tank first!', true);
       return;

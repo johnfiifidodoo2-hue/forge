@@ -159,6 +159,18 @@ async function main() {
     },
   });
 
+  // This is deliberately detailed so the AI proposal engine can be tested with
+  // concrete compute-architecture inputs instead of generic SaaS copy.
+  const project7 = await prisma.project.create({
+    data: {
+      title: 'EdgeTensor RISC-V NPU for Private Industrial Vision',
+      description:
+        'A RISC-V RV64GC edge SoC with a 128-MAC INT8 neural-processing coprocessor, 512 KB scratchpad SRAM, DMA-fed double buffering, and coherent L2 cache. The FPGA MVP targets sub-8 W industrial gateways for private defect detection, with 31 FPS at 1080p and a sub-20 ms end-to-end latency target. We need manufacturing design partners and an RTL verification specialist.',
+      tags: 'Computer Architecture, RISC-V, NPU, Edge AI, FPGA, DMA, Memory Hierarchy',
+      ownerId: creator.id,
+    },
+  });
+
   // -- Comments --
   await prisma.comment.create({
     data: {
@@ -166,6 +178,14 @@ async function main() {
         'This is highly needed. The legal frameworks around shared storefronts are incredibly messy right now.',
       projectId: project1.id,
       authorId: expert.id,
+    },
+  });
+
+  await prisma.comment.create({
+    data: {
+      content: 'Lead your benchmark with end-to-end latency and TOPS/W, then show how DMA double buffering keeps the MAC array fed. That makes the memory-hierarchy advantage legible to both customers and investors.',
+      projectId: project7.id,
+      authorId: expert3.id,
     },
   });
 
@@ -237,6 +257,9 @@ async function main() {
       { userId: creator.id, projectId: project6.id },
       { userId: expert3.id, projectId: project6.id },
       { userId: creator2.id, projectId: project6.id },
+      { userId: expert.id, projectId: project7.id },
+      { userId: expert2.id, projectId: project7.id },
+      { userId: expert3.id, projectId: project7.id },
     ],
   });
 
@@ -246,65 +269,149 @@ async function main() {
       {
         title: 'Sponsorship Pitch Deck Template',
         description: 'The exact slide layout used to secure $50k+ brand deals. Completely customizable in Figma and Google Slides.',
-        url: 'https://forge.dev/resources/pitch-deck',
+        url: 'https://www.ycombinator.com/library/4A-a-guide-to-seed-fundraising',
         category: 'TEMPLATE',
         sharedById: expert.id,
       },
       {
         title: '2026 Guide to Creator Legal Protections',
         description: 'An expert-written handbook on protecting your IP when partnering with agencies and brands.',
-        url: 'https://forge.dev/resources/legal-guide',
+        url: 'https://www.eff.org/issues/intellectual-property',
         category: 'GUIDE',
         sharedById: expert.id,
       },
       {
         title: 'Interactive Thumbnail A/B Tester',
         description: 'A lightweight browser tool to simulate how your thumbnails look on different device mockups.',
-        url: 'https://forge.dev/resources/ab-tester',
+        url: 'https://vwo.com/ab-testing/',
         category: 'TOOL',
         sharedById: creator.id,
       },
       {
         title: 'Forge UI Kit — Dark Mode Components',
         description: 'Reusable cards, forms, and navigation patterns for collaboration dashboards. Built with vanilla CSS.',
-        url: 'https://forge.dev/resources/ui-kit',
+        url: 'https://ui.shadcn.com/',
         category: 'UI_KIT',
         sharedById: expert2.id,
       },
       {
         title: 'JWT Auth Middleware Snippet',
         description: 'Drop-in Express middleware for Bearer token validation with role checks. Copy-paste ready.',
-        url: 'https://forge.dev/resources/jwt-snippet',
+        url: 'https://expressjs.com/en/advanced/best-practice-security.html',
         category: 'CODE_SNIPPET',
         sharedById: expert2.id,
       },
       {
         title: 'React Component Testing Cheatsheet',
         description: 'A comprehensive guide to testing React components with Vitest and React Testing Library. Includes common patterns.',
-        url: 'https://forge.dev/resources/react-testing',
+        url: 'https://testing-library.com/docs/react-testing-library/intro/',
         category: 'GUIDE',
         sharedById: creator2.id,
       },
       {
         title: 'Accessible Form Patterns Library',
         description: 'A collection of ARIA-compliant form patterns with keyboard navigation. Includes date pickers, autocomplete, and multi-select.',
-        url: 'https://forge.dev/resources/a11y-forms',
+        url: 'https://www.w3.org/WAI/ARIA/apg/patterns/',
         category: 'CODE_SNIPPET',
         sharedById: creator2.id,
       },
       {
         title: 'API Documentation Starter Template',
         description: 'A Markdown-based documentation template for REST APIs. Includes endpoint tables, auth guides, and error code references.',
-        url: 'https://forge.dev/resources/api-docs-template',
+        url: 'https://spec.openapis.org/oas/latest.html',
         category: 'TEMPLATE',
         sharedById: expert2.id,
       },
       {
         title: 'Color Contrast Checker CLI',
         description: 'A Node.js CLI tool that audits your CSS files for WCAG color contrast compliance and generates a report.',
-        url: 'https://forge.dev/resources/contrast-cli',
+        url: 'https://www.deque.com/axe/devtools/',
         category: 'TOOL',
         sharedById: expert3.id,
+      },
+      {
+        title: 'RISC-V ISA Manual and Ratified Specifications',
+        description: 'Primary reference for RV32/RV64 ISA design, extensions, privilege levels, and custom-instruction research.',
+        url: 'https://riscv.org/technical/specifications/',
+        category: 'HARDWARE',
+        sharedById: expert3.id,
+      },
+      {
+        title: 'OpenTitan Silicon Root of Trust',
+        description: 'Open-source SystemVerilog SoC project with verification, firmware, register-generation, and security architecture examples.',
+        url: 'https://opentitan.org/',
+        category: 'HARDWARE',
+        sharedById: expert3.id,
+      },
+      {
+        title: 'CHIPS Alliance Open-Source Hardware',
+        description: 'Production-oriented open silicon ecosystem and RISC-V projects for studying SoC integration, EDA, and verification workflows.',
+        url: 'https://www.chipsalliance.org/',
+        category: 'HARDWARE',
+        sharedById: expert3.id,
+      },
+      {
+        title: 'NVIDIA CUDA Samples',
+        description: 'Maintained CUDA reference samples for memory transfers, occupancy, matrix multiplication, and GPU performance analysis.',
+        url: 'https://github.com/NVIDIA/cuda-samples',
+        category: 'GITHUB_REPO',
+        sharedById: expert3.id,
+      },
+      {
+        title: 'lowRISC Ibex RISC-V Core',
+        description: 'Readable SystemVerilog implementation of an embedded RISC-V CPU, useful for pipeline, interrupt, and verification study.',
+        url: 'https://github.com/lowRISC/ibex',
+        category: 'GITHUB_REPO',
+        sharedById: expert3.id,
+      },
+      {
+        title: 'RARS RISC-V Assembly Examples',
+        description: 'Runnable assembly examples for loads, stores, branches, calling conventions, and simple programs.',
+        url: 'https://github.com/TheThirdOne/rars/tree/master/examples',
+        category: 'CODE_SNIPPET',
+        sharedById: expert2.id,
+      },
+      {
+        title: 'Express Security Patterns',
+        description: 'Copy-ready server hardening patterns for headers, TLS, cookies, validation, and dependency hygiene.',
+        url: 'https://expressjs.com/en/advanced/best-practice-security.html',
+        category: 'CODE_SNIPPET',
+        sharedById: creator.id,
+      },
+      {
+        title: 'CUDA Matrix Multiplication Sample',
+        description: 'Tiled matrix-multiplication reference showing shared-memory locality and GPU compute-kernel trade-offs.',
+        url: 'https://github.com/NVIDIA/cuda-samples/tree/master/Samples/6_Performance/MatrixMul',
+        category: 'CODE_SNIPPET',
+        sharedById: expert3.id,
+      },
+      {
+        title: 'Y Combinator SAFE Documents',
+        description: 'Current standard SAFE fundraising documents and founder guidance for testing the funding-template category.',
+        url: 'https://www.ycombinator.com/documents',
+        category: 'TEMPLATE',
+        sharedById: expert.id,
+      },
+      {
+        title: 'Material Design 3',
+        description: 'Accessible component, colour, typography, and interaction guidance for product-design testing.',
+        url: 'https://m3.material.io/',
+        category: 'UI_KIT',
+        sharedById: expert.id,
+      },
+      {
+        title: 'Prisma PostgreSQL Documentation',
+        description: 'Schema, migrations, query patterns, and production connection-management documentation.',
+        url: 'https://www.prisma.io/docs/orm/overview/databases/postgresql',
+        category: 'GUIDE',
+        sharedById: expert2.id,
+      },
+      {
+        title: 'Vercel Platform Documentation',
+        description: 'Deployment, serverless-function, environment-variable, and observability docs for testing platform links.',
+        url: 'https://vercel.com/docs',
+        category: 'TOOL',
+        sharedById: creator.id,
       },
     ],
   });
