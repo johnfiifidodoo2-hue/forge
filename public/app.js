@@ -1235,6 +1235,7 @@ const CATEGORY_LABELS = {
   UI_KIT: 'UI Kit & Design Tokens',
   GUIDE: 'Documentation & Guide',
   TOOL: 'Platform & Cloud Tool',
+  VIDEO: 'YouTube Learning Video',
   CODE_SNIPPET: 'Code Snippet',
 };
 
@@ -1245,6 +1246,7 @@ const CATEGORY_CSS = {
   UI_KIT: 'ui-kit',
   GUIDE: 'guide',
   TOOL: 'tool',
+  VIDEO: 'guide',
   CODE_SNIPPET: 'code-snippet',
 };
 
@@ -1329,7 +1331,8 @@ function renderResourceCard(r, index) {
   const isSaved = state.savedResources.includes(r.id);
   const targetUrl = r.url || r.downloadUrl;
   const isGithub = r.category === 'GITHUB_REPO' || String(targetUrl).includes('github.com');
-  const btnLabel = isGithub ? 'Open GitHub Repo ↗' : 'Open Resource ↗';
+  const isVideo = r.category === 'VIDEO' || /youtube\.com|youtu\.be/.test(String(targetUrl));
+  const btnLabel = isGithub ? 'Open GitHub Repo ↗' : isVideo ? 'Watch on YouTube ↗' : 'Open Resource ↗';
 
   return `
   <div class="glass-card resource-card card-animated" style="${staggerDelay(index)}">

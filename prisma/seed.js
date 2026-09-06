@@ -89,6 +89,28 @@ async function main() {
     },
   });
 
+  const embeddedCreator = await prisma.user.create({
+    data: {
+      email: 'nora@forge.dev', name: 'Nora Mensah', password: hashedPassword, role: 'CREATOR',
+      bio: 'Embedded-systems engineer building practical edge-AI tools for factories and field teams.',
+      skills: 'C++, Embedded Linux, FPGA, Computer Vision, MQTT', portfolioUrl: 'https://github.com',
+    },
+  });
+  const systemsCreator = await prisma.user.create({
+    data: {
+      email: 'daniel@forge.dev', name: 'Daniel Owusu', password: hashedPassword, role: 'CREATOR',
+      bio: 'Product-minded backend developer interested in reliable systems and developer experience.',
+      skills: 'Node.js, PostgreSQL, Redis, API Design, Observability', portfolioUrl: 'https://github.com',
+    },
+  });
+  const designCreator = await prisma.user.create({
+    data: {
+      email: 'leila@forge.dev', name: 'Leila Haddad', password: hashedPassword, role: 'CREATOR',
+      bio: 'Interaction designer translating complex ML and infrastructure tools into usable products.',
+      skills: 'Figma, UX Research, Data Visualisation, Design Systems', portfolioUrl: 'https://dribbble.com',
+    },
+  });
+
   console.log('👤 Created users:');
   console.log('  - Creator: creator@forge.dev');
   console.log('  - Creator: kai@forge.dev');
@@ -170,6 +192,20 @@ async function main() {
       ownerId: creator.id,
     },
   });
+  const project8 = await prisma.project.create({
+    data: {
+      title: 'CacheScope: Interactive Memory-Hierarchy Visualiser',
+      description: 'A browser-based tool that turns CPU cache traces into interactive L1/L2/DRAM timelines. Students can compare direct-mapped, set-associative, and fully-associative caches while observing compulsory, capacity, and conflict misses.',
+      tags: 'Computer Architecture, Cache, Memory Hierarchy, Education, Visualisation', ownerId: designCreator.id,
+    },
+  });
+  const project9 = await prisma.project.create({
+    data: {
+      title: 'Reliable Sensor Telemetry for Cold-Chain Logistics',
+      description: 'Offline-tolerant telemetry for refrigerated delivery: LoRaWAN gateways batch signed readings, an idempotent event stream accepts retries, and a dashboard surfaces temperature excursions before product spoils.',
+      tags: 'IoT, Distributed Systems, Observability, Logistics, Edge Compute', ownerId: embeddedCreator.id,
+    },
+  });
 
   // -- Comments --
   await prisma.comment.create({
@@ -179,6 +215,15 @@ async function main() {
       projectId: project1.id,
       authorId: expert.id,
     },
+  });
+  await prisma.comment.create({
+    data: { content: 'Include a prefetch view so learners can see when it helps throughput but creates wasted memory bandwidth.', projectId: project8.id, authorId: embeddedCreator.id },
+  });
+  await prisma.comment.create({
+    data: { content: 'Use stable device IDs and idempotency keys from day one. Gateway retry storms are inevitable after connectivity returns.', projectId: project9.id, authorId: systemsCreator.id },
+  });
+  await prisma.comment.create({
+    data: { content: 'Present EdgeTensor accuracy, latency, and power together; operators need a clear decision, not a wall of microarchitecture terms.', projectId: project7.id, authorId: designCreator.id },
   });
 
   await prisma.comment.create({
@@ -411,6 +456,41 @@ async function main() {
         description: 'Deployment, serverless-function, environment-variable, and observability docs for testing platform links.',
         url: 'https://vercel.com/docs',
         category: 'TOOL',
+        sharedById: creator.id,
+      },
+      {
+        title: 'How CPU Memory & Caches Work (Computerphile)',
+        description: 'Visual explanation of cache organisation, locality, cache levels, and memory access for computer-architecture learners.',
+        url: 'https://www.youtube.com/watch?v=SAk-6gVkio0',
+        category: 'VIDEO',
+        sharedById: expert3.id,
+      },
+      {
+        title: 'RISC-V Assembly and Architecture Learning Path',
+        description: 'YouTube learning path for RISC-V assembly, instruction formats, memory access, and processor fundamentals.',
+        url: 'https://www.youtube.com/results?search_query=RISC-V+assembly+computer+architecture+tutorial',
+        category: 'VIDEO',
+        sharedById: expert2.id,
+      },
+      {
+        title: 'GPU Architecture, Memory, and Parallelism',
+        description: 'YouTube learning path covering CUDA, GPU memory, parallel execution, and matrix-compute fundamentals.',
+        url: 'https://www.youtube.com/results?search_query=GPU+architecture+memory+parallelism+CUDA+tutorial',
+        category: 'VIDEO',
+        sharedById: expert3.id,
+      },
+      {
+        title: 'RISC-V Single-Cycle Processor in Verilog',
+        description: 'A practical video lesson on creating a RISC-V datapath, control unit, register file, ALU, and data memory in Verilog.',
+        url: 'https://www.youtube.com/watch?v=dh88oe6O0QU',
+        category: 'VIDEO',
+        sharedById: expert2.id,
+      },
+      {
+        title: 'System Design: Caching and CDNs',
+        description: 'YouTube learning path connecting caching, CDNs, latency, consistency, and real infrastructure trade-offs.',
+        url: 'https://www.youtube.com/results?search_query=system+design+caching+CDN+tutorial',
+        category: 'VIDEO',
         sharedById: creator.id,
       },
     ],

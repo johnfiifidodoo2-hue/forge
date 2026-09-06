@@ -4,7 +4,7 @@ const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
-const VALID_CATEGORIES = ['UI_KIT', 'CODE_SNIPPET', 'TEMPLATE', 'GUIDE', 'TOOL', 'GITHUB_REPO', 'HARDWARE'];
+const VALID_CATEGORIES = ['UI_KIT', 'CODE_SNIPPET', 'TEMPLATE', 'GUIDE', 'TOOL', 'GITHUB_REPO', 'HARDWARE', 'VIDEO'];
 
 function normalizeHttpUrl(value) {
   try {
